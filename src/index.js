@@ -3,6 +3,7 @@ const path = require('path')
 const express = require('express')
 const morgan = require('morgan')
 const { Server } = require('socket.io')
+const cors = require('cors')
 
 // Import dotenv
 const keyPath = path.join(__dirname, '../.env')
@@ -18,11 +19,20 @@ const routerSocketIO = require('./routes/socket.io')
 const db = require('./config/db')
 const { createServer } = require('http')
 
+const optionCORS = {
+    origin: ['http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+}
 const app = express()
 const server = createServer(app)
-const io = new Server(server)
+const io = new Server(server, {
+    cors: optionCORS,
+})
 
 // middleware
+app.use(cors(optionCORS))
 app.use(morgan('combined'))
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
