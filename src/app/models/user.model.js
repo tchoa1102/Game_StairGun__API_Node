@@ -4,10 +4,10 @@ const ObjectId = Schema.ObjectId
 const newObjectId = mongoose.Types.ObjectId
 
 const CharacterModel = require('./character.model')
-const { levelUpSchema, bagSchema } = require('../schemas')
+const { itemSchema } = require('../schemas')
 
-const UserModel = Schema({
-    idFBase: { type: ObjectId, default: newObjectId('000000000000000000000000') },
+const UserModel = new Schema({
+    idFBase: { type: ObjectId, default: new newObjectId('000000000000000000000000') },
     idSocket: { type: String, default: undefined },
     name: { type: String, default: '' },
     level: { type: Number, default: 1 },
@@ -21,7 +21,7 @@ const UserModel = Schema({
     character: {
         type: ObjectId,
         ref: 'characters',
-        default: newObjectId('000000000000000000000000'),
+        default: new newObjectId('000000000000000000000000'),
     },
     skills: [
         {
@@ -29,7 +29,7 @@ const UserModel = Schema({
             ref: 'Skill',
         },
     ],
-    bag: [bagSchema],
+    bag: [itemSchema],
 })
 
 module.exports = mongoose.model('users', UserModel)

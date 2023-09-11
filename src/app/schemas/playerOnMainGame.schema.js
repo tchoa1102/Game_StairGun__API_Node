@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const ObjectId = Schema.ObjectId
 
-const playerOnMainGameSchema = Schema({
+const playerOnMainGameSchema = new Schema({
     x: { type: String, default: '0' }, // why is string? Because store datatype is double
     y: { type: String, default: '0' },
     hp: { type: String, default: '0' },

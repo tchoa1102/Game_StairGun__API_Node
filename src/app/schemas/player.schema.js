@@ -6,7 +6,7 @@ const newObjectId = mongoose.Types.ObjectId
 const playerOnMainGameSchema = require('./playerOnMainGame.schema')
 const playerOnStairGameSchema = require('./playerOnStairGame.schema')
 
-const playerSchema = Schema({
+const playerSchema = new Schema({
     target: {
         type: ObjectId,
         ref: 'users',

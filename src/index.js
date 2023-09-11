@@ -18,6 +18,7 @@ const router = require('./routes')
 const routerSocketIO = require('./routes/socket.io')
 const db = require('./config/db')
 const { createServer } = require('http')
+const configGame = require('./gameConfig.json')
 
 const optionCORS = {
     origin: ['http://localhost:3000'],
@@ -38,6 +39,21 @@ app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
 // Routes
+app.use((req, res, next) => {
+    try {
+        console.log(
+            `\x1b${configGame.colors.bg.green}%s\x1b${configGame.colors.reset}`,
+            '->->->->->->->->->-> handling request <-<-<-<-<-<-<-<-<-<-',
+        )
+        next()
+    } catch (error) {
+        console.log(error)
+    }
+    console.log(
+        `\x1b${configGame.colors.bg.gray}%s\x1b${configGame.colors.reset}`,
+        '-x-x-x-x-x- request was handled -x-x-x-x-x-',
+    )
+})
 router(app)
 routerSocketIO(io)
 app.use((error, req, res, next) => {

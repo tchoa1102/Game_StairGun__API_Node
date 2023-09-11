@@ -1,0 +1,159 @@
+{
+    "frames": {
+        "stand-0": {
+            "frame": { "x": 0, "y": 0, "w": 33, "h": 147 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 147 },
+            "sourceSize": { "w": 32, "h": 147 }
+        },
+        "stand-1": {
+            "frame": { "x": 33, "y": 0, "w": 33, "h": 147 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 33, "y": 0, "w": 33, "h": 147 },
+            "sourceSize": { "w": 32, "h": 147 }
+        },
+        "run-0": {
+            "frame": { "x": 0, "y": 147, "w": 49, "h": 147 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 147, "w": 49, "h": 147 },
+            "sourceSize": { "w": 49, "h": 147 }
+        },
+        "run-1": {
+            "frame": { "x": 49, "y": 147, "w": 49, "h": 147 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 49, "y": 147, "w": 49, "h": 147 },
+            "sourceSize": { "w": 49, "h": 147 }
+        },
+        "run-2": {
+            "frame": { "x": 98, "y": 147, "w": 75, "h": 147 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 98, "y": 147, "w": 75, "h": 147 },
+            "sourceSize": { "w": 75, "h": 147 }
+        },
+        "run-3": {
+            "frame": { "x": 173, "y": 147, "w": 78, "h": 147 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 173, "y": 147, "w": 78, "h": 147 },
+            "sourceSize": { "w": 78, "h": 147 }
+        },
+        "jump-0": {
+            "frame": { "x": 0, "y": 294, "w": 33, "h": 147 },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": { "x": 0, "y": 147, "w": 33, "h": 147 },
+            "sourceSize": { "w": 33, "h": 147 }
+        }
+    },
+    "meta": {
+        "app": "TexturePacker x.x.x",
+        "version": "1.0",
+        "image": "circleStickAtlas.png",
+        "format": "RGBA8888",
+        "size": { "w": 256, "h": 441 },
+        "scale": "1"
+    },
+    "src": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/sticks/yoaekvoe4eieqpxfwy3o.png",
+    "animation": {
+        "stand": {
+            "key": "stand",
+            "frames": [
+                {
+                    "frame": "stand-0",
+                    "duration": 1,
+                    "flipX": false
+                },
+                {
+                    "frame": "stand-1",
+                    "duration": 1,
+                    "flipX": false
+                }
+            ],
+            "frameRate": 10,
+            "repeat": -1
+        },
+        "runRight": {
+            "key": "runRight",
+            "frames": [
+                {
+                    "frame": "run-0",
+                    "duration": 1,
+                    "flipX": false
+                },
+                {
+                    "frame": "run-1",
+                    "duration": 1,
+                    "flipX": false
+                },
+                {
+                    "frame": "run-2",
+                    "duration": 1,
+                    "flipX": false
+                },
+                {
+                    "frame": "run-3",
+                    "duration": 1,
+                    "flipX": false
+                }
+            ],
+            "frameRate": 10,
+            "repeat": -1
+        },
+        "runLeft": {
+            "key": "runLeft",
+            "frames": [
+                {
+                    "frame": "run-0",
+                    "duration": 1,
+                    "flipX": true
+                },
+                {
+                    "frame": "run-1",
+                    "duration": 1,
+                    "flipX": true
+                },
+                {
+                    "frame": "run-2",
+                    "duration": 1,
+                    "flipX": true
+                },
+                {
+                    "frame": "run-3",
+                    "duration": 1,
+                    "flipX": true
+                }
+            ],
+            "frameRate": 10,
+            "repeat": -1
+        },
+        "jumpRight": {
+            "key": "jumpRight",
+            "frames": [
+                {
+                    "frame": "jump-0",
+                    "duration": 1,
+                    "flipX": false
+                }
+            ],
+            "frameRate": 10,
+            "repeat": 0
+        },
+        "jumpLeft": {
+            "key": "jumpLeft",
+            "frames": [
+                {
+                    "frame": "jump-0",
+                    "duration": 1,
+                    "flipX": true
+                }
+            ],
+            "frameRate": 10,
+            "repeat": 0
+        }
+    }
+}

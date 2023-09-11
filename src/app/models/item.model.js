@@ -4,7 +4,7 @@ const newObjectId = mongoose.Types.ObjectId
 
 const { propertySchema } = require('../schemas')
 
-const ItemModel = mongoose.Schema({
+const ItemModel = new mongoose.Schema({
     name: { type: String, required: true },
     type: { type: String, required: true },
     canWear: { type: Boolean, default: false },
@@ -12,7 +12,9 @@ const ItemModel = mongoose.Schema({
     hasPowerSkill: {
         type: ObjectId,
         ref: 'powerskills',
-        default: newObjectId('000000000000000000000000'),
+        default: new newObjectId('000000000000000000000000'),
     },
     property: [propertySchema],
 })
+
+module.exports = new mongoose.model('itemmodels', ItemModel)

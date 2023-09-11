@@ -6,7 +6,7 @@ const newObjectId = mongoose.Types.ObjectId
 
 const MapModel = require('./map.model')
 
-const MatchModel = Schema({
+const MatchModel = new Schema({
     map: { type: ObjectId, ref: 'maps', required: true },
     backgroundStair: {
         type: String,

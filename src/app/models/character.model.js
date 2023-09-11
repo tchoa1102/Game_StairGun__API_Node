@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const CharacterModel = mongoose.Schema({
+const CharacterModel = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String, default: 'Coming soon' },
     srcConfig: { type: String, required: true },

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const PowerSkillModel = mongoose.Schema({
+const PowerSkillModel = new mongoose.Schema({
     name: { type: String, required: true },
     type: { type: String, default: '' },
     srcConfig: { type: String, required: true },
