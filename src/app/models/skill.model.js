@@ -7,3 +7,5 @@ const SkillModel = new mongoose.Schema({
     img: { type: String, required: true },
     staRequire: { type: Number, required: true },
 })
+
+module.exports = mongoose.model('skills', SkillModel)

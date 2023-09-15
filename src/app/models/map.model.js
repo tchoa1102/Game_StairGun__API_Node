@@ -6,3 +6,5 @@ const MapModel = new mongoose.Schema({
     canBeDestroyed: { type: Boolean, required: true },
     srcConfig: { type: String, required: true },
 })
+
+module.exports = mongoose.model('maps', MapModel)

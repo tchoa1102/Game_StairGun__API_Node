@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const { playerSchema, cardOnStairGame } = require('../schemas')
+const { playerSchema, cardOnStairGame, stairSchema } = require('../schemas')
 const Schema = mongoose.Schema
 const ObjectId = Schema.ObjectId
 const newObjectId = mongoose.Types.ObjectId
@@ -21,4 +21,4 @@ const MatchModel = new Schema({
     cards: [cardOnStairGame],
 })
 
-module.exports = new mongoose.Schema('matches', MatchModel)
+module.exports = mongoose.model('matches', MatchModel)

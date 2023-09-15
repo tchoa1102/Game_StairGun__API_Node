@@ -17,4 +17,4 @@ const ItemModel = new mongoose.Schema({
     property: [propertySchema],
 })
 
-module.exports = new mongoose.model('itemmodels', ItemModel)
+module.exports = mongoose.model('items', ItemModel)

@@ -3,7 +3,7 @@
         "1": false,
         "2": true
     },
-    "maxStair": 500,
+    "maxStair": 80,
     "maxCard": 300,
     "maxWidthStairGame": 1000,
     "maxHeightStairGame": 3400,

@@ -6,4 +6,4 @@ const CharacterModel = new mongoose.Schema({
     srcConfig: { type: String, required: true },
 })
 
-module.exports = new mongoose.model('characters', CharacterModel)
+module.exports = mongoose.model('characters', CharacterModel)

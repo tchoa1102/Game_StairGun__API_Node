@@ -5,3 +5,5 @@ const PowerSkillModel = new mongoose.Schema({
     type: { type: String, default: '' },
     srcConfig: { type: String, required: true },
 })
+
+module.exports = mongoose.model('powerskills', PowerSkillModel)

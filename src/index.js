@@ -40,11 +40,11 @@ app.use(express.urlencoded({ extended: true })) // for parsing application/x-www
 
 // Routes
 app.use((req, res, next) => {
+    console.log(
+        `\x1b${configGame.colors.bg.green}%s\x1b${configGame.colors.reset}`,
+        '->->->->->->->->->-> handling request <-<-<-<-<-<-<-<-<-<-',
+    )
     try {
-        console.log(
-            `\x1b${configGame.colors.bg.green}%s\x1b${configGame.colors.reset}`,
-            '->->->->->->->->->-> handling request <-<-<-<-<-<-<-<-<-<-',
-        )
         next()
     } catch (error) {
         console.log(error)

@@ -58,8 +58,10 @@
         "size": { "w": 256, "h": 441 },
         "scale": "1"
     },
-    "src": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/sticks/yoaekvoe4eieqpxfwy3o.png",
-    "animation": {
+    "src": [
+        "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/sticks/yoaekvoe4eieqpxfwy3o.png"
+    ],
+    "animations": {
         "stand": {
             "key": "stand",
             "frames": [
