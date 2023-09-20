@@ -10,8 +10,8 @@ function routes(app) {
         return res.json({ message: 'Success logging' })
     })
     app.use('/api/auth/load', AuthController.load)
-    app.use('/api/matches/:match/stair', stair)
-    app.use('/api/matches', match)
+    // app.use('/api/matches/:match/stair', stair)
+    // app.use('/api/matches', match)
 }
 
 module.exports = routes

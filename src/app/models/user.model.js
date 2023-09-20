@@ -6,33 +6,36 @@ const newObjectId = mongoose.Types.ObjectId
 const CharacterModel = require('./character.model')
 const { itemSchema } = require('../schemas')
 
-const UserModel = new Schema({
-    uid: { type: String, default: null }, //idFBase
-    socketId: { type: String, default: null },
-    clientId: { type: String, default: null },
-    name: { type: String, default: null },
-    email: { type: String, default: null },
-    picture: { type: String, default: null },
-    level: { type: Number, default: 1 },
-    HP: { type: String, default: '100' }, // health point
-    STA: { type: String, default: '100' }, // stamina point
-    ATK: { type: String, default: '10' }, // attack point
-    DEF: { type: String, default: '5' }, // defense point
-    LUK: { type: String, default: '5' }, // lucky point
-    AGI: { type: String, default: '5' }, // agility point
+const UserModel = new Schema(
+    {
+        uid: { type: String, default: null }, //idFBase
+        socketId: { type: String, default: null },
+        clientId: { type: String, default: null },
+        name: { type: String, default: null },
+        email: { type: String, default: null },
+        picture: { type: String, default: null },
+        level: { type: Number, default: 1 },
+        HP: { type: String, default: '100' }, // health point
+        STA: { type: String, default: '100' }, // stamina point
+        ATK: { type: String, default: '10' }, // attack point
+        DEF: { type: String, default: '5' }, // defense point
+        LUK: { type: String, default: '5' }, // lucky point
+        AGI: { type: String, default: '5' }, // agility point
 
-    character: {
-        type: ObjectId,
-        ref: 'characters',
-        default: new newObjectId('000000000000000000000000'),
-    },
-    skills: [
-        {
+        character: {
             type: ObjectId,
-            ref: 'Skill',
+            ref: 'characters',
+            default: new newObjectId('65015266187107a35aa5c222'),
         },
-    ],
-    bag: [itemSchema],
-})
+        skills: [
+            {
+                type: ObjectId,
+                ref: 'Skill',
+            },
+        ],
+        bag: [itemSchema],
+    },
+    { timestamps: true },
+)
 
 module.exports = mongoose.model('users', UserModel)

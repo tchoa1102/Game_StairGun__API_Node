@@ -1,3 +1,5 @@
+const site = require('./site')
+const chat = require('./chat')
 const stick = require('./stick')
 
 module.exports = function (io) {
@@ -8,9 +10,13 @@ module.exports = function (io) {
         socket.on('disconnect', function () {
             console.log(`A user disconnected, ${socket?.id}, clientID: ${socket?.client?.id}`)
         })
-        socket.on('send-message', function (data) {
-            console.log(`ClientID: ${socket?.client?.id}, data: ${data}`)
-        })
-        stick(socket)
+        site(socket, io)
+        chat(socket, io)
+        stick(socket, io)
     })
 }
+
+/**
+ * socket.client.socket => idSocket
+ * socket.client.conn.id => idSocketClient
+ */

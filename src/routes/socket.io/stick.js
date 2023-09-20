@@ -1,4 +1,4 @@
-module.exports = async function (socket) {
+module.exports = async function (socket, io) {
     socket.on('stick-stand', function ({ _id, socketId, event }) {
         console.log('stand: ')
         socket.emit('stick-keyboard-event', { _id, event, x: 1, y: 0 })
