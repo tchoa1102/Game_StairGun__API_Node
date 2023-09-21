@@ -46,6 +46,21 @@ class Middleware {
             return res.status(404).json({ message: 'Occurred an error' })
         }
     }
+
+    async decodeTokenSocket(socket, next) {
+        const req = socket.handshake
+        const accessToken = req.auth.token || req.auth.access_token || req.auth.accessToken
+        const decodeValue = await admin.auth().verifyIdToken(accessToken)
+        if (decodeValue) {
+            // console.log(decodeValue)
+            let id = decodeValue.firebase.identities['google.com'][0]
+            while (id.length < 24) {
+                id = id + '1'
+            }
+            socket.handshake.idPlayer = id
+            next()
+        }
+    }
 }
 
 module.exports = new Middleware()

@@ -19,6 +19,7 @@ const routerSocketIO = require('./routes/socket.io')
 const db = require('./config/db')
 const { createServer } = require('http')
 const configGame = require('./gameConfig.json')
+const middlewares = require('./middlewares')
 
 const optionCORS = {
     origin: ['http://localhost:3000'],
@@ -55,6 +56,7 @@ app.use((req, res, next) => {
     )
 })
 router(app)
+io.use(middlewares.decodeTokenSocket)
 routerSocketIO(io)
 app.use((error, req, res, next) => {
     console.log(error)

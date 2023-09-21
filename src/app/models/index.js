@@ -8,4 +8,5 @@ module.exports = {
     PowerSkillsModel: require('./power_skills.model'),
     SkillModel: require('./skill.model'),
     StateEffectModel: require('./stateEffect.model'),
+    RoomModel: require('./room.model'),
 }
