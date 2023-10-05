@@ -14,6 +14,7 @@ const RoomModel = Schema(
                     player: { type: Schema.ObjectId, required: true },
                     isOnRoom: { type: Boolean, default: true },
                     isRoomMaster: { type: Boolean, default: false },
+                    position: { type: Number, required: true },
                 },
                 { timestamps: true },
             ),

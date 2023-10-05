@@ -1,10 +1,7 @@
 const { default: mongoose } = require('mongoose')
 const { UserModel, RoomModel } = require('../../../app/models')
 const RoomAddRes = require('./room.add.res')
-
-function convertTypeMap(room) {
-    return room.typeMap.toString() === '000000000000000000000000' ? 'Ngẫu nhiên' : 'Tự chọn'
-}
+const RoomPlayerRemoveRes = require('./room.player.remove.res')
 
 class room {
     // #region again
@@ -19,14 +16,17 @@ class room {
             try {
                 const room = await RoomModel.findById(idRoom)
 
-                console.log('Go on room..., idRoom: ', idRoom, ', type room: ', room.type)
-                const player = await UserModel.findById(idPlayer)
+                console.log(
+                    'Go on room..., idRoom: ',
+                    idRoom,
+                    ', type room: ',
+                    room.type,
+                    ', player: ' + idPlayer,
+                )
                 const nowPlayerOnRoom = await RoomModel.find({
                     'players.player': socket.handshake.idPLayer,
                     'players.isOnRoom': true,
                 })
-                // console.log(room)
-                // console.log(nowPlayerOnRoom)
                 if (nowPlayerOnRoom.length > 0) {
                     socket.emit('rooms/players/add/res/error', {
                         status: 400,
@@ -35,36 +35,44 @@ class room {
                     return
                 }
                 if (room.type === 'Tự do') {
+                    let newPosition = 0
                     const countPlayerOnRoom = room.players.reduce((total, p) => {
+                        if (newPosition === p.position && p.isOnRoom) newPosition += 1
                         if (p.isOnRoom) total += 1
                         return total
                     }, 0)
                     if (countPlayerOnRoom < room.maxNum) {
-                        const playerOnRoom = {
-                            player: idPlayer,
-                            isOnRoom: true,
-                            isRoomMaster: false,
-                        }
                         const playerGoOnAgain = room.players.find(
                             (p) => p.player.toString() === socket.handshake.idPlayer,
                         )
 
-                        console.log(playerGoOnAgain)
                         if (playerGoOnAgain !== undefined) {
                             playerGoOnAgain.isOnRoom = true
+                            playerGoOnAgain.position = newPosition
                         } else {
                             console.log('Room tu do...')
+                            const playerOnRoom = {
+                                player: idPlayer,
+                                isOnRoom: true,
+                                isRoomMaster: false,
+                                position: newPosition,
+                            }
                             room.players.push(playerOnRoom)
                         }
                         await room.save()
 
-                        room._doc.typeMap = convertTypeMap(room)
-                        socket.join(room._id)
-                        io.to(room._id).emit('rooms/players/add/res', {
-                            data: new RoomAddRes({
-                                ...playerOnRoom,
-                                player: player,
-                            }),
+                        // console.log(room.players)
+                        socket.join(room._id.toString())
+
+                        const r = room.toObject()
+                        for (const p of r.players) {
+                            const player = await UserModel.findById(p.player).lean()
+                            p.player = player
+                        }
+
+                        console.log('Connections on room: ', io.sockets.adapter.rooms.get(room._id))
+                        io.to(room._id.toString()).emit('rooms/players/add/res', {
+                            data: new RoomAddRes(r),
                         })
                         io.emit('rooms', {
                             type: 'update',
@@ -94,6 +102,7 @@ class room {
     create(socket, io) {
         return async () => {
             const idPlayer = socket.handshake.idPlayer
+            console.log('Create room from request of: ' + idPlayer)
             // const player = await UserModel.findById(idPlayer)
             const nowPlayerOnRoom = await RoomModel.find({
                 'players.player': socket.handshake.idPlayer,
@@ -114,21 +123,20 @@ class room {
                         player: idPlayer,
                         isOnRoom: true,
                         isRoomMaster: true,
+                        position: 0,
                     }
                     const room = new RoomModel()
                     room.players.push(playerOnRoom)
 
                     await room.save()
-                    socket.join(room._id.toString())
-                    room._doc.typeMap = convertTypeMap(room)
+                    const r = room.toObject()
+                    socket.join(r._id.toString())
 
-                    io.emit('rooms', { type: 'create', data: room })
+                    io.emit('rooms', { type: 'create', data: r })
 
-                    const currentRoom = { ...room.toObject(), chatRoom: [] }
-                    // console.log(currentRoom)
-                    currentRoom.players[0].player = { ...player.toObject() }
+                    r.players[0].player = { ...player.toObject() }
                     socket.emit('rooms/players/add/res', {
-                        data: currentRoom,
+                        data: new RoomAddRes(r),
                     })
                 } catch (error) {
                     console.log('create room: ', error)
@@ -149,11 +157,13 @@ class room {
                 'players.player': socket.handshake.idPlayer,
                 'players.isOnRoom': true,
             }).lean()
+            console.log('Go out: ' + socket.handshake.idPlayer)
 
             for (const room of rooms) {
                 room.players.forEach((p) => {
                     if (p.player.toString() === idPlayer) {
                         p.isOnRoom = false
+                        let newMaster = undefined
                         if (p.isRoomMaster) {
                             p.isRoomMaster = false
                             const otherP = room.players.find(
@@ -161,19 +171,28 @@ class room {
                             )
 
                             if (otherP) {
-                                room.players[otherP].isRoomMaster = true
+                                otherP.isRoomMaster = true
+                                newMaster = otherP.player
                             }
                         }
+                        console.log('emit ', room._id.toString())
+                        socket.to(room._id.toString()).emit('rooms/players/remove/res', {
+                            data: new RoomPlayerRemoveRes({
+                                player: idPlayer,
+                                position: p.position,
+                                newMaster,
+                            }),
+                        })
                     }
                 })
 
+                socket.leave(room._id.toString())
                 // console.log(room)
                 await RoomModel.updateOne({ _id: room._id }, room)
-                room.typeMap = convertTypeMap(room)
+                io.emit('rooms', { type: 'update', data: new RoomAddRes(room) })
             }
-            console.log(rooms[rooms.length - 1])
+            // console.log(rooms[rooms.length - 1])
 
-            io.emit('rooms', { type: 'update', data: rooms[rooms.length - 1] })
             socket.emit('rooms/players/goOut/res')
         }
     }

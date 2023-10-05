@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 
 const MessageModel = Schema(
     {
-        type: { type: String, required: true }, // room / user
+        type: { type: String, enum: ['public', 'room', 'private'], required: true }, // room / private / public
         value: { type: String, required: true },
         from: { type: Schema.ObjectId, ref: 'users' },
         to: {

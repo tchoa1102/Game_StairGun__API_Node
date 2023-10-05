@@ -3,6 +3,7 @@ const chat = require('./chat')
 const stick = require('./stick')
 const room = require('./site/room')
 const { RoomModel, UserModel } = require('../../app/models')
+const RoomAddRes = require('./site/room.add.res')
 
 module.exports = function (io) {
     io.on('connection', async function (socket) {
@@ -41,27 +42,7 @@ module.exports = function (io) {
             )
 
             // go out room
-            const roomNow = await RoomModel.find({ 'players.isOnRoom': true })
-
-            const idPlayer = socket.handshake.idPlayer
-            for (let room of roomNow) {
-                for (let p of room.players) {
-                    // console.log(p)
-                    if (p.player.toString() === idPlayer) {
-                        p.isOnRoom = false
-                        p.isRoomMaster = false
-                        for (let otherP of room.players) {
-                            if (otherP.player.toString() !== idPlayer && otherP.isOnRoom === true) {
-                                otherP.isRoomMaster = true
-                                break
-                            }
-                        }
-                        break
-                    }
-                }
-                // console.log(room)
-                await room.save()
-            }
+            room.goOut(socket, io)()
         })
 
         // other
