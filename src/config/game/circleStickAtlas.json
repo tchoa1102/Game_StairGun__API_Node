@@ -59,7 +59,12 @@
         "scale": "1"
     },
     "src": [
-        "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/sticks/yoaekvoe4eieqpxfwy3o.png"
+        "https://res.cloudinary.com/dyhfvkzag/image/upload/v1694334597/StairGunGame/stairGame/sticks/circle.stick.0.png",
+        "https://res.cloudinary.com/dyhfvkzag/image/upload/v1696395068/StairGunGame/stairGame/sticks/circle.stick.1.png",
+        "https://res.cloudinary.com/dyhfvkzag/image/upload/v1696395068/StairGunGame/stairGame/sticks/circle.stick.2.png",
+        "https://res.cloudinary.com/dyhfvkzag/image/upload/v1696395068/StairGunGame/stairGame/sticks/circle.stick.3.png",
+        "https://res.cloudinary.com/dyhfvkzag/image/upload/v1696395068/StairGunGame/stairGame/sticks/circle.stick.4.png",
+        "https://res.cloudinary.com/dyhfvkzag/image/upload/v1696395068/StairGunGame/stairGame/sticks/circle.stick.5.png"
     ],
     "animations": {
         "stand": {
