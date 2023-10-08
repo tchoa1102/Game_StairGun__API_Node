@@ -37,22 +37,22 @@ const UserModel = new Schema(
             face: {
                 type: String,
                 default:
-                    'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1696432418/StairGunGame/equipment/face/face.default.json',
+                    'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/face/face.default.json',
             },
             body: {
                 type: String,
                 default:
-                    'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1696433056/StairGunGame/equipment/body/body.default.json',
+                    'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/body/body.default.json',
             },
             hand: {
                 type: String,
                 default:
-                    'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1696433054/StairGunGame/equipment/body/body.default.hand.json',
+                    'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/body/body.default.hand.json',
             },
             foot: {
                 type: String,
                 default:
-                    'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1696431803/StairGunGame/equipment/foot/foot.default.json',
+                    'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/foot/foot.default.json',
             },
         },
         bag: [itemSchema],

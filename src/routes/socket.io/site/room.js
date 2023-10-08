@@ -2,14 +2,52 @@ const { default: mongoose } = require('mongoose')
 const { UserModel, RoomModel } = require('../../../app/models')
 const RoomAddRes = require('./room.add.res')
 const RoomPlayerRemoveRes = require('./room.player.remove.res')
+const RoomRes = require('./room.res')
 
 class room {
     // #region again
-    // emit: rooms/players/add/res, rooms/players/add/res/error
+    // emit: rooms/players/add/res, res/error
     async reGoIntoMatch(socket, io) {}
     // #endregion again
 
-    // on: rooms/players/add | emit: rooms, rooms/players/add/res, rooms/players/add/res/error
+    // on: rooms/players/ready | emit: rooms/players/ready/res, res/error
+    ready(socket, io) {
+        return async ({ idRoom, isReady }) => {
+            const idPlayer = socket.handshake.idPlayer
+            try {
+                const room = await RoomModel.findById(idRoom).lean()
+
+                if (!room) {
+                    socket.emit('res/error', { status: 404 })
+                    return
+                }
+                let player = {}
+                room.players.forEach((p) => {
+                    if (p.player.toString() === idPlayer) {
+                        p.isReady = isReady
+                        Object.assign(player, p)
+                    }
+                })
+                await RoomModel.updateOne({ _id: room._id }, room)
+                io.to(idRoom).emit(
+                    'rooms/players/ready/res',
+                    new RoomRes({
+                        _id: idRoom,
+                        player: {
+                            ...player,
+                            _id: idPlayer,
+                            isReady: isReady,
+                        },
+                    }),
+                )
+            } catch (error) {
+                console.log(error)
+                socket.emit('res/error', { status: 500 })
+            }
+        }
+    }
+
+    // on: rooms/players/add | emit: rooms, rooms/players/add/res, res/error
     add(socket, io) {
         return async ({ idRoom }) => {
             const idPlayer = socket.handshake.idPlayer
@@ -28,7 +66,7 @@ class room {
                     'players.isOnRoom': true,
                 })
                 if (nowPlayerOnRoom.length > 0) {
-                    socket.emit('rooms/players/add/res/error', {
+                    socket.emit('res/error', {
                         status: 400,
                         message: 'Người chơi đã có phòng!',
                     })
@@ -50,11 +88,9 @@ class room {
                             playerGoOnAgain.isOnRoom = true
                             playerGoOnAgain.position = newPosition
                         } else {
-                            console.log('Room tu do...')
+                            // console.log('Room tu do...')
                             const playerOnRoom = {
                                 player: idPlayer,
-                                isOnRoom: true,
-                                isRoomMaster: false,
                                 position: newPosition,
                             }
                             room.players.push(playerOnRoom)
@@ -65,12 +101,16 @@ class room {
                         socket.join(room._id.toString())
 
                         const r = room.toObject()
+                        const playersOnRoom = []
                         for (const p of r.players) {
-                            const player = await UserModel.findById(p.player).lean()
-                            p.player = player
+                            if (p.isOnRoom) {
+                                const player = await UserModel.findById(p.player).lean()
+                                p.player = player
+                                playersOnRoom.push(p)
+                            }
                         }
+                        r.players = playersOnRoom
 
-                        console.log('Connections on room: ', io.sockets.adapter.rooms.get(room._id))
                         io.to(room._id.toString()).emit('rooms/players/add/res', {
                             data: new RoomAddRes(r),
                         })
@@ -81,14 +121,14 @@ class room {
                         return
                     }
 
-                    return socket.emit('rooms/players/add/res/error', {
+                    return socket.emit('res/error', {
                         status: 400,
                         message: 'Vào phòng thất bại!',
                     })
                 }
             } catch (error) {
                 console.log(error)
-                socket.emit('rooms/players/add/res/error', {
+                socket.emit('res/error', {
                     status: 400,
                     message: 'Phòng không tồn tại!',
                 })
@@ -98,7 +138,7 @@ class room {
         }
     }
 
-    // on: rooms/create | emit: rooms, rooms/players/add/res, rooms/players/add/res/error
+    // on: rooms/create | emit: rooms, rooms/players/add/res, res/error
     create(socket, io) {
         return async () => {
             const idPlayer = socket.handshake.idPlayer
@@ -110,7 +150,7 @@ class room {
             })
 
             if (nowPlayerOnRoom.length > 0) {
-                socket.emit('rooms/players/add/res/error', {
+                socket.emit('res/error', {
                     status: 400,
                     message: 'Người chơi đã có phòng!',
                 })
@@ -121,7 +161,6 @@ class room {
                     const player = await UserModel.findById(idPlayer)
                     const playerOnRoom = {
                         player: idPlayer,
-                        isOnRoom: true,
                         isRoomMaster: true,
                         position: 0,
                     }
@@ -132,7 +171,7 @@ class room {
                     const r = room.toObject()
                     socket.join(r._id.toString())
 
-                    io.emit('rooms', { type: 'create', data: r })
+                    io.emit('rooms', { type: 'create', data: new RoomAddRes(r) })
 
                     r.players[0].player = { ...player.toObject() }
                     socket.emit('rooms/players/add/res', {
@@ -150,6 +189,7 @@ class room {
         }
     }
 
+    // on: rooms/players/goOut | emit: rooms, rooms/players/goOut/res, rooms/players/remove/res,
     goOut(socket, io) {
         return async () => {
             const idPlayer = socket.handshake.idPlayer

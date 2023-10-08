@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
+const UserModel = require('./user.model')
+
 const RoomModel = Schema(
     {
         type: { type: String, default: 'Tự do' },
@@ -11,10 +13,11 @@ const RoomModel = Schema(
         players: [
             new Schema(
                 {
-                    player: { type: Schema.ObjectId, required: true },
+                    player: { type: Schema.ObjectId, ref: 'users', required: true },
+                    position: { type: Number, required: true },
                     isOnRoom: { type: Boolean, default: true },
                     isRoomMaster: { type: Boolean, default: false },
-                    position: { type: Number, required: true },
+                    isReady: { type: Boolean, default: false },
                 },
                 { timestamps: true },
             ),
