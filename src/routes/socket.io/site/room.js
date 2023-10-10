@@ -1,8 +1,18 @@
 const { default: mongoose } = require('mongoose')
-const { UserModel, RoomModel } = require('../../../app/models')
+const {
+    UserModel,
+    RoomModel,
+    CharacterModel,
+    MatchModel,
+    MapModel,
+} = require('../../../app/models')
 const RoomAddRes = require('./room.add.res')
 const RoomPlayerRemoveRes = require('./room.player.remove.res')
 const RoomRes = require('./room.res')
+const config = require('../../../gameConfig.json')
+
+const { createStairs } = require('../../../shares')
+const MatchRes = require('./match.res')
 
 class room {
     // #region again
@@ -10,7 +20,43 @@ class room {
     async reGoIntoMatch(socket, io) {}
     // #endregion again
 
-    // on: rooms/players/ready | emit: rooms/players/ready/res, res/error
+    // on: rooms/players/change-position | emit: res/error, rooms/players/change-position/res
+    changePosition(socket, io) {
+        return async ({ idRoom, position }) => {
+            const idPlayer = socket.handshake.idPlayer
+            try {
+                const room = await RoomModel.findById(idRoom).lean()
+                if (!room) {
+                    return socket.emit('res/error', { status: 404, message: 'Room not found!' })
+                }
+
+                let playerIndex = -1
+                const isPositionNoEmpty = room.players.some((p, index) => {
+                    if (p.player.toString() === idPlayer) playerIndex = index
+                    return p.isOnRoom && p.position === position
+                })
+                if (isPositionNoEmpty || playerIndex === -1) {
+                    return socket.emit('res/error', {
+                        status: 404,
+                        message: 'Position is not empty!',
+                    })
+                }
+
+                room.players[playerIndex].position = position
+                await RoomModel.updateOne({ _id: room._id }, room)
+
+                return io.to(idRoom).emit('rooms/players/change-position/res', {
+                    player: idPlayer,
+                    position: position,
+                })
+            } catch (error) {
+                console.log(error)
+                return socket.emit('res/error', { status: 500 })
+            }
+        }
+    }
+
+    // on: rooms/players/ready | emit: matches/start/res, rooms/players/ready/res, res/error
     ready(socket, io) {
         return async ({ idRoom, isReady }) => {
             const idPlayer = socket.handshake.idPlayer
@@ -22,24 +68,98 @@ class room {
                     return
                 }
                 let player = {}
+                const teamA = []
+                const teamB = []
                 room.players.forEach((p) => {
                     if (p.player.toString() === idPlayer) {
                         p.isReady = isReady
                         Object.assign(player, p)
                     }
+
+                    if (p.isOnRoom && p.isReady) {
+                        if (p.position < 3) {
+                            teamA.push(p.position)
+                        } else {
+                            teamB.push(p.position)
+                        }
+                    }
                 })
+
                 await RoomModel.updateOne({ _id: room._id }, room)
-                io.to(idRoom).emit(
-                    'rooms/players/ready/res',
-                    new RoomRes({
-                        _id: idRoom,
-                        player: {
-                            ...player,
-                            _id: idPlayer,
-                            isReady: isReady,
-                        },
-                    }),
-                )
+                if (teamA.length !== teamB.length) {
+                    return io.to(idRoom).emit(
+                        'rooms/players/ready/res',
+                        new RoomRes({
+                            _id: idRoom,
+                            player: {
+                                ...player,
+                                _id: idPlayer,
+                                isReady: isReady,
+                            },
+                        }),
+                    )
+                }
+                const listStair = createStairs()
+                const characters = await CharacterModel.find({
+                    name: /stick-/,
+                })
+                const maps = await MapModel.find()
+                const mapChosenIndex = Math.floor(Math.random() * maps.length)
+                const map = maps[mapChosenIndex]
+                const configCircleStick = characters[0].srcConfig
+
+                // #region init players
+                const players = []
+                for (const p of room.players) {
+                    if (p.isOnRoom) {
+                        const dataPlayer = await UserModel.findById(p.player).lean()
+                        const player = {
+                            target: dataPlayer,
+                            position: p.position,
+                            mainGame: {
+                                x: 10,
+                                y: 10,
+                                hp: dataPlayer.hp,
+                                sta: dataPlayer.sta,
+                                atk: dataPlayer.atk,
+                                def: dataPlayer.def,
+                                luk: dataPlayer.luk,
+                                agi: dataPlayer.agi,
+                                stateEffects: [],
+                            },
+                            stairGame: {
+                                x: Math.random() * config.maxWidthStairGame,
+                                y: config.maxHeightStairGame - 200,
+                            },
+                        }
+
+                        players.push(player)
+                    }
+                }
+                // #endregion init players
+
+                const cards = []
+
+                const timeStart = new Date().toISOString()
+
+                const newMatch = new MatchModel({
+                    timeStart,
+                    cards,
+                    curTiled: '',
+                    players: players.map((p) => ({
+                        ...p,
+                        target: p.target,
+                    })),
+                    stairs: listStair,
+                    map: map._id,
+                })
+
+                // await newMatch.save()
+                // console.log('Create match: ', newMatch)
+
+                return io.to(idRoom).emit('matches/start/res', {
+                    data: new MatchRes(newMatch, configCircleStick, map.srcConfig),
+                })
             } catch (error) {
                 console.log(error)
                 socket.emit('res/error', { status: 500 })

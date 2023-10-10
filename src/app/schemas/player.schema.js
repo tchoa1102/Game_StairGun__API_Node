@@ -11,6 +11,7 @@ const playerSchema = new Schema({
         type: ObjectId,
         ref: 'users',
     },
+    position: { type: Number, required: true },
     mainGame: playerOnMainGameSchema,
     stairGame: playerOnStairGameSchema,
 })

@@ -7,6 +7,10 @@ const playerOnMainGameSchema = new Schema({
     y: { type: String, default: '0' },
     hp: { type: String, default: '0' },
     sta: { type: Number, default: 0 },
+    atk: { type: String, default: '0' },
+    def: { type: String, default: '0' },
+    luk: { type: String, default: '0' },
+    agi: { type: String, default: '0' },
     power_point: { type: Number, default: 0 },
     stateEffects: [
         {

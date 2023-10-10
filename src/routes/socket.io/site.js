@@ -8,4 +8,8 @@ module.exports = function (socket, io) {
         'rooms/players/ready',
         async ({ idRoom, isReady }) => await room.ready(socket, io)({ idRoom, isReady }),
     )
+    socket.on(
+        'rooms/players/change-position',
+        async ({ idRoom, position }) => await room.changePosition(socket, io)({ idRoom, position }),
+    )
 }
