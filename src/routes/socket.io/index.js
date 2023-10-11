@@ -9,6 +9,7 @@ module.exports = function (io) {
     io.on('connection', async function (socket) {
         // #region when first connected
         // console.log(socket)
+        socket.join('1')
         console.log('idPlayer: ', socket.handshake.idPlayer)
         const dataSendWhenConnection = { clientId: socket.client.id, socketId: socket.id }
         try {
