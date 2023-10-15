@@ -1,3 +1,4 @@
+const match = require('./site/match')
 const room = require('./site/room')
 
 module.exports = function (socket, io) {
@@ -11,5 +12,11 @@ module.exports = function (socket, io) {
     socket.on(
         'rooms/players/change-position',
         async ({ idRoom, position }) => await room.changePosition(socket, io)({ idRoom, position }),
+    )
+
+    socket.on(
+        'matches/loaded',
+        async ({ idMatch, idRoom }) =>
+            await match.loadedDataObject(socket, io)({ idMatch, idRoom }),
     )
 }

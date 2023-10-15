@@ -8,15 +8,14 @@ const MapModel = require('./map.model')
 
 const MatchModel = new Schema({
     map: { type: ObjectId, ref: 'maps', required: true },
-    curTiled: { type: String, required: true }, // tiled on match
+    curTiled: { type: String }, // tiled on match
     stairs: [stairSchema],
-    timeStart: { type: Number, required: true }, // unit of time: seconds
-    players: [playerSchema],
-    cards: [cardOnStairGame],
+    timeStart: { type: String, required: true }, // unit of time: seconds
+    // cards: [cardOnStairGame],
     backgroundStair: {
         type: String,
         default:
-            'https://drive.google.com/file/d/11zYw6_rUr4EQqoi4516UTrOelHcdwT_O/view?usp=drive_link',
+            'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/stairGame/backgrounds/iopp1dd3m8rsghldcgdh.png',
     },
     timeEnd: { type: Number }, // unit of time: milliseconds
 })

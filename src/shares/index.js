@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const math = require('mathjs')
 const config = require('../gameConfig.json')
 const { stairSchema } = require('../app/schemas')
 
@@ -24,6 +25,8 @@ function createStairs() {
 }
 
 function createCards(stairs) {}
+
+function checkCollision(mainShape, targetShape) {}
 
 module.exports = {
     createStairs,

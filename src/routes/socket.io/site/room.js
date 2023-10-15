@@ -5,6 +5,7 @@ const {
     CharacterModel,
     MatchModel,
     MapModel,
+    PlayerOnMatchModel,
 } = require('../../../app/models')
 const RoomAddRes = require('./room.add.res')
 const RoomPlayerRemoveRes = require('./room.player.remove.res')
@@ -56,7 +57,7 @@ class room {
         }
     }
 
-    // on: rooms/players/ready | emit: matches/start/res, rooms/players/ready/res, res/error
+    // on: rooms/players/ready | emit: matches/create/res, rooms/players/ready/res, res/error
     ready(socket, io) {
         return async ({ idRoom, isReady }) => {
             const idPlayer = socket.handshake.idPlayer
@@ -100,6 +101,7 @@ class room {
                     )
                 }
                 const listStair = createStairs()
+                // console.log(listStair)
                 const characters = await CharacterModel.find({
                     name: /stick-/,
                 })
@@ -108,57 +110,69 @@ class room {
                 const map = maps[mapChosenIndex]
                 const configCircleStick = characters[0].srcConfig
 
-                // #region init players
-                const players = []
-                for (const p of room.players) {
-                    if (p.isOnRoom) {
-                        const dataPlayer = await UserModel.findById(p.player).lean()
-                        const player = {
-                            target: dataPlayer,
-                            position: p.position,
-                            mainGame: {
-                                x: 10,
-                                y: 10,
-                                hp: dataPlayer.hp,
-                                sta: dataPlayer.sta,
-                                atk: dataPlayer.atk,
-                                def: dataPlayer.def,
-                                luk: dataPlayer.luk,
-                                agi: dataPlayer.agi,
-                                stateEffects: [],
-                            },
-                            stairGame: {
-                                x: Math.random() * config.maxWidthStairGame,
-                                y: config.maxHeightStairGame - 200,
-                            },
-                        }
-
-                        players.push(player)
-                    }
-                }
-                // #endregion init players
-
                 const cards = []
 
                 const timeStart = new Date().toISOString()
 
                 const newMatch = new MatchModel({
                     timeStart,
-                    cards,
                     curTiled: '',
-                    players: players.map((p) => ({
-                        ...p,
-                        target: p.target,
-                    })),
                     stairs: listStair,
                     map: map._id,
                 })
 
-                // await newMatch.save()
+                // #region init players
+                const players = []
+                for (const p of room.players) {
+                    if (p.isOnRoom) {
+                        const dataPlayer = await UserModel.findById(p.player).lean()
+                        const indexStair = Math.floor(Math.random() * listStair.length)
+                        const player = {
+                            match: newMatch._id,
+                            target: dataPlayer,
+                            position: p.position,
+                            mainGame: {
+                                x: 10,
+                                y: 10,
+                                hp: dataPlayer.HP,
+                                sta: dataPlayer.STA,
+                                atk: dataPlayer.ATK,
+                                def: dataPlayer.DEF,
+                                luk: dataPlayer.LUK,
+                                agi: dataPlayer.AGI,
+                                stateEffects: [],
+                            },
+                            stairGame: {
+                                x:
+                                    listStair[indexStair].x +
+                                    Math.random() * listStair[indexStair].width,
+                                y: listStair[indexStair].y,
+                            },
+                        }
+
+                        const pl = PlayerOnMatchModel(player)
+                        await pl.save()
+                        players.push(player)
+                    }
+                }
+                // #endregion init players
+
+                await newMatch.save()
                 // console.log('Create match: ', newMatch)
 
-                return io.to(idRoom).emit('matches/start/res', {
-                    data: new MatchRes(newMatch, configCircleStick, map.srcConfig),
+                const dataMatchRes = {
+                    ...newMatch.toObject(),
+                    players: players.map((p) => ({
+                        ...p,
+                        target: p.target,
+                    })),
+                    cards,
+                }
+
+                const dataRes = new MatchRes(dataMatchRes, configCircleStick, map.srcConfig)
+                // console.log(dataRes)
+                return io.to(idRoom).emit('matches/create/res', {
+                    data: dataRes,
                 })
             } catch (error) {
                 console.log(error)

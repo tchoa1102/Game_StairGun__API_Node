@@ -9,4 +9,5 @@ module.exports = {
     SkillModel: require('./skill.model'),
     StateEffectModel: require('./stateEffect.model'),
     RoomModel: require('./room.model'),
+    PlayerOnMatchModel: require('./playerOnMatch.model'),
 }

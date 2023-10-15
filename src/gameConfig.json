@@ -10,6 +10,11 @@
     "stair": {
         "maxWidth": 500
     },
+    "stick": {
+        "w": 33,
+        "h": 147,
+        "scale": 0.5
+    },
     "colors": {
         "require": "\\x1b",
         "reset": "[0m",
