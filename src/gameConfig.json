@@ -4,11 +4,15 @@
         "2": true
     },
     "maxStair": 50,
-    "maxCard": 300,
+    "maxCard": 40,
     "maxWidthStairGame": 1000,
     "maxHeightStairGame": 3400,
     "stair": {
         "maxWidth": 500
+    },
+    "stairGame": {
+        "width": 1000,
+        "height": 3500
     },
     "stick": {
         "w": 33,

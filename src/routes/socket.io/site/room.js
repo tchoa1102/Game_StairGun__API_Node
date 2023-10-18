@@ -157,6 +157,31 @@ class room {
                 }
                 // #endregion init players
 
+                const p = players.reduce((result, player) => {
+                    result[player.target._id.toString()] = {}
+                    result[player.target._id.toString()] = {
+                        ...player,
+                        mainGame: { ...player.mainGame },
+                        stairGame: { vx: 0, vy: 0, ...player.stairGame },
+                    }
+                    return result
+                }, {})
+
+                socket.handshake.match = {
+                    stairsSortX: listStair,
+                    timeStart: timeStart,
+                    players: p,
+                    eventState: undefined,
+                    endEventTime: Math.abs(new Date() - new Date(0)),
+                }
+
+                players.forEach((player) => {
+                    io.sockets.sockets.get(player.target.socketId).handshake.match =
+                        socket.handshake.match
+                })
+
+                // console.log(socket.handshake.match)
+
                 await newMatch.save()
                 // console.log('Create match: ', newMatch)
 
@@ -233,6 +258,7 @@ class room {
 
                         // console.log(room.players)
                         socket.join(room._id.toString())
+                        socket.handshake.idRoom = room._id.toString()
 
                         const r = room.toObject()
                         const playersOnRoom = []
@@ -304,6 +330,7 @@ class room {
                     await room.save()
                     const r = room.toObject()
                     socket.join(r._id.toString())
+                    socket.handshake.idRoom = r._id.toString()
 
                     io.emit('rooms', { type: 'create', data: new RoomAddRes(r) })
 
@@ -361,6 +388,7 @@ class room {
                 })
 
                 socket.leave(room._id.toString())
+                socket.handshake.idRoom = undefined
                 // console.log(room)
                 await RoomModel.updateOne({ _id: room._id }, room)
                 io.emit('rooms', { type: 'update', data: new RoomAddRes(room) })

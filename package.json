@@ -30,6 +30,7 @@
     "firebase-admin": "^11.10.1",
     "mathjs": "^11.11.2",
     "mongoose": "^7.5.0",
+    "nerdamer": "^1.1.13",
     "socket.io": "^4.7.2"
   },
   "devDependencies": {
