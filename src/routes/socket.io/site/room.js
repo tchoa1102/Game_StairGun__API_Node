@@ -14,6 +14,7 @@ const config = require('../../../gameConfig.json')
 
 const { createStairs } = require('../../../shares')
 const MatchRes = require('./match.res')
+const cardController = require('../../../app/controllers/card.controller')
 
 class room {
     // #region again
@@ -110,8 +111,6 @@ class room {
                 const map = maps[mapChosenIndex]
                 const configCircleStick = characters[0].srcConfig
 
-                const cards = []
-
                 const timeStart = new Date().toISOString()
 
                 const newMatch = new MatchModel({
@@ -120,6 +119,8 @@ class room {
                     stairs: listStair,
                     map: map._id,
                 })
+
+                const cards = await cardController.createListCards(newMatch._id, listStair)
 
                 // #region init players
                 const players = []
@@ -147,6 +148,8 @@ class room {
                                     listStair[indexStair].x +
                                     Math.random() * listStair[indexStair].width,
                                 y: listStair[indexStair].y,
+                                vx: 0,
+                                vy: 0,
                             },
                         }
 
@@ -156,28 +159,21 @@ class room {
                     }
                 }
                 // #endregion init players
-
-                const p = players.reduce((result, player) => {
-                    result[player.target._id.toString()] = {}
-                    result[player.target._id.toString()] = {
-                        ...player,
-                        mainGame: { ...player.mainGame },
-                        stairGame: { vx: 0, vy: 0, ...player.stairGame },
-                    }
-                    return result
-                }, {})
-
-                socket.handshake.match = {
-                    stairsSortX: listStair,
-                    timeStart: timeStart,
-                    players: p,
-                    eventState: undefined,
-                    endEventTime: Math.abs(new Date() - new Date(0)),
-                }
-
                 players.forEach((player) => {
-                    io.sockets.sockets.get(player.target.socketId).handshake.match =
-                        socket.handshake.match
+                    const data = {
+                        match: newMatch._id,
+                        map: map._id,
+                        curTiled: '',
+
+                        stairs: listStair,
+                        cards,
+                        timeStart: timeStart,
+                        players: players.map((p) => p.target),
+                        player,
+                        eventState: undefined,
+                        endEventTime: Math.abs(new Date() - new Date(0)),
+                    }
+                    io.sockets.sockets.get(player.target.socketId).handshake.match = data
                 })
 
                 // console.log(socket.handshake.match)

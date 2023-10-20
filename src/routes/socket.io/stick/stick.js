@@ -4,20 +4,22 @@ const StickEventRes = require('./stick..event.res')
 const { createLineFromTwoPoint, findIntersectionXLevel2 } = require('../../../shares')
 const CONSTANT_STICK = require('./CONSTANT')
 
-function getLocation(s) {
-    return s?.handshake?.match?.players[this._id]
-}
-class stick {
-    constructor() {
+// function getLocation(s) {
+//     return s?.handshake?.match?.players[this._id]
+// }
+class Stick {
+    constructor(socket, io) {
+        this.socket = socket
+        this.io = io
         this.EVENT = 'stick-keyboard-event'
-        this._id = undefined
+        this._id = this.socket.handshake.idPlayer
         this.vx = 4
         this.eventsState = { ...CONSTANT_STICK }
     }
 
     // #region get/set
-    getId(socket) {
-        return socket.handshake.idPlayer
+    getId() {
+        return this._id
     }
 
     setId(id) {
@@ -35,194 +37,225 @@ class stick {
     }
     // #endregion get/set
 
-    stand(socket, io) {
-        return async ({ event }) => {
-            this.setId(this.getId(socket))
-            const location = socket.handshake.match.players[this._id].stairGame
-            socket.handshake.match.eventStateSpecial = this.eventsState.stand
-            this.resetLocation(location)
-            this.updateLocation(location)
+    stand({ event }) {
+        this.setId(this.getId())
+        const location = this.socket.handshake.match.player.stairGame
+        this.socket.handshake.match.eventStateSpecial = this.eventsState.stand
+        this.resetLocation(location)
+        this.updateLocation(location)
 
-            const mainShape = createShapeStick(
-                location.x,
-                location.y,
-                config.stick.w * config.stick.scale,
-                config.stick.h * config.stick.scale,
-            )
-            const shapesStair = socket.handshake.match.stairs.map((stair) =>
-                createShapeStair(stair.x, stair.y, stair.width, stair.height),
-            )
-            const nearest = findNearest(mainShape, shapesStair)
-            const standingPlace = Math.min(config.stairGame.height, nearest.bottomNearest[0].y)
-            if (standingPlace > location.y) {
-                socket.handshake.match.eventStateSpecial = this.eventsState.freeFall
+        const mainShape = createShapeStick(
+            location.x,
+            location.y,
+            config.stick.w * config.stick.scale,
+            config.stick.h * config.stick.scale,
+        )
+        const shapesStair = this.socket.handshake.match.stairs.map((stair) =>
+            createShapeStair(stair.x, stair.y, stair.width, stair.height),
+        )
+        const nearest = findNearest(mainShape, shapesStair)
+        const standingPlace = Math.min(config.stairGame.height, nearest.bottomNearest[0].y)
+        if (standingPlace > location.y) {
+            this.socket.handshake.match.eventStateSpecial = this.eventsState.freeFall
 
-                const distanceToStandingPlace = standingPlace - location.y
-                const fall = freeFall(location, distanceToStandingPlace)
-                console.log(fall, distanceToStandingPlace)
-                socket.handshake.match.endEventTime = Math.abs(new Date() + fall.time * 1000)
-                location.y = fall.location.y
-            }
-
-            // console.log(mainShape, nearest)
-            console.log('stand: ', location)
-            io.to(socket.handshake.idRoom).emit(
-                this.EVENT,
-                new StickEventRes(this._id, event, location.x, location.y),
-            )
-            return
+            const distanceToStandingPlace = standingPlace - location.y
+            const fall = freeFall(location, distanceToStandingPlace)
+            console.log(fall, distanceToStandingPlace)
+            this.socket.handshake.match.endEventTime = Math.abs(new Date() + fall.time * 1000)
+            location.y = fall.location.y
         }
+
+        // console.log(mainShape, nearest)
+        console.log('stand: ', location)
+        this.io
+            .to(this.socket.handshake.idRoom)
+            .emit(this.EVENT, new StickEventRes(this._id, event, location.x, location.y))
+        return
     }
-    left(socket, io) {
-        return async ({ event }) => {
-            this.setId(this.getId(socket))
-            const location = socket.handshake.match.players[this._id].stairGame
+    left({ event }) {
+        this.setId(this.getId())
+        console.log(this.getId())
+        const location = this.socket.handshake.match.player.stairGame
 
-            const mainShape = createShapeStick(
-                location.x,
-                location.y,
-                config.stick.w * config.stick.scale,
-                config.stick.h * config.stick.scale,
-            )
-            const stairShapes = socket.handshake.match.stairs.map((stair) =>
-                createShapeStair(stair.x, stair.y, stair.width, stair.height),
-            )
+        const mainShape = createShapeStick(
+            location.x,
+            location.y,
+            config.stick.w * config.stick.scale,
+            config.stick.h * config.stick.scale,
+        )
+        const stairShapes = this.socket.handshake.match.stairs.map((stair) =>
+            createShapeStair(stair.x, stair.y, stair.width, stair.height),
+        )
+        const cardShapes = this.socket.handshake.match.cards.map((card) =>
+            createShapeCard(card.x, card.y, card.width, card.height),
+        )
 
-            const nearest = findNearest(mainShape, stairShapes)
+        const nearest = findNearest(mainShape, stairShapes)
+        const nearestCards = findNearest(mainShape, cardShapes)
 
-            const distance = mainShape[0].x - nearest.leftNearest[1].x
-            // console.log(distance)
-            if (!Number.isFinite(nearest.leftNearest[1].x) || distance > 0) {
-                location.vx = -Math.min(this.vx, distance)
-                this.updateLocation(location)
+        const distance = mainShape[0].x - nearest.leftNearest[1].x
+        // console.log(distance)
+        if (!Number.isFinite(nearest.leftNearest[1].x) || distance > 0) {
+            location.vx = -Math.min(this.vx, distance)
+            this.updateLocation(location)
+        }
+        const distanceWithCard = mainShape[0].x - nearestCards.leftNearest[1].x
+        const distanceWithBottomCard = mainShape[0].x - nearestCards.bottomNearest[1].x
+        if (distanceWithCard <= 0) {
+            for (const card of socket.handshake.match.cards) {
+                if (
+                    card.x === nearestCards.leftNearest[3].x &&
+                    card.y === nearestCards.leftNearest[3].y &&
+                    !card.owner
+                ) {
+                    card.isShow = false
+                    card.owner = this._id
+                    // sendEvent
+                }
             }
-            const standingPlace = Math.min(config.stairGame.height, nearest.bottomNearest[0].y)
-            if (standingPlace > location.y) {
-                socket.handshake.match.eventStateSpecial = this.eventsState.freeFall
+        }
+        const standingPlace = Math.min(config.stairGame.height, nearest.bottomNearest[0].y)
+        if (standingPlace > location.y) {
+            this.socket.handshake.match.eventStateSpecial = this.eventsState.freeFall
 
-                const distanceToStandingPlace = standingPlace - location.y
-                const fall = freeFall(location, distanceToStandingPlace)
-                console.log(fall, distanceToStandingPlace)
-                socket.handshake.match.endEventTime = Math.abs(new Date() + fall.time * 1000)
-                location.y = fall.location.y
-            } else {
-                socket.handshake.match.eventStateSpecial = this.eventsState.stand
+            const distanceToStandingPlace = standingPlace - location.y
+            const fall = freeFall(location, distanceToStandingPlace)
+            console.log(fall, distanceToStandingPlace)
+            this.socket.handshake.match.endEventTime = Math.abs(new Date() + fall.time * 1000)
+            location.y = fall.location.y
+
+            if (distanceWithBottomCard <= distanceToStandingPlace) {
+                const cardPickedUp = this.socket.handshake.match.cards.find(
+                    (card) =>
+                        card.x === nearestCards.bottomNearest[3].x &&
+                        card.y === nearestCards.bottomNearest[3].y,
+                )
+                cardPickedUp.pickUpTime = new Date().toISOString()
+                cardPickedUp.owner = this._id
+                cardPickedUp.isShow = false
             }
+        } else {
+            this.socket.handshake.match.eventStateSpecial = this.eventsState.stand
+        }
 
-            // console.log(mainShape, nearest)
-            console.log('left: ', location)
-            const specialEvent = socket.handshake.match.eventStateSpecial
-            io.to(socket.handshake.idRoom).emit(
+        // console.log(mainShape, nearest)
+        console.log('left: ', location)
+        const specialEvent = this.socket.handshake.match.eventStateSpecial
+        this.io
+            .to(this.socket.handshake.idRoom)
+            .emit(
                 this.EVENT,
                 new StickEventRes(this._id, event, location.x, location.y, specialEvent),
             )
-        }
     }
-    right(socket, io) {
-        return async ({ event }) => {
-            this.setId(this.getId(socket))
-            const location = socket.handshake.match.players[this._id].stairGame
+    right({ event }) {
+        this.setId(this.getId())
+        const location = this.socket.handshake.match.player.stairGame
 
-            const mainShape = createShapeStick(
-                location.x,
-                location.y,
-                config.stick.w * config.stick.scale,
-                config.stick.h * config.stick.scale,
-            )
-            const stairShapes = socket.handshake.match.stairs.map((stair) =>
-                createShapeStair(stair.x, stair.y, stair.width, stair.height),
-            )
-            const nearest = findNearest(mainShape, stairShapes)
-            const distance = nearest.rightNearest[0].x - mainShape[1].x
+        const mainShape = createShapeStick(
+            location.x,
+            location.y,
+            config.stick.w * config.stick.scale,
+            config.stick.h * config.stick.scale,
+        )
+        const stairShapes = this.socket.handshake.match.stairs.map((stair) =>
+            createShapeStair(stair.x, stair.y, stair.width, stair.height),
+        )
+        const nearest = findNearest(mainShape, stairShapes)
+        const cardsShape = this.socket.handshake.match.cards.map((card) =>
+            createShapeCard(card.x, card.y, card.width, card.height),
+        )
+        const distance = nearest.rightNearest[0].x - mainShape[1].x
 
-            if (!Number.isFinite(nearest.rightNearest[1].x) || distance > 0) {
-                location.vx = Math.min(this.vx, distance)
-                this.updateLocation(location)
-            }
-            const standingPlace = Math.min(config.stairGame.height, nearest.bottomNearest[0].y)
-            if (standingPlace > location.y) {
-                socket.handshake.match.eventStateSpecial = this.eventsState.freeFall
+        if (!Number.isFinite(nearest.rightNearest[1].x) || distance > 0) {
+            location.vx = Math.min(this.vx, distance)
+            this.updateLocation(location)
+        }
+        const standingPlace = Math.min(config.stairGame.height, nearest.bottomNearest[0].y)
+        if (standingPlace > location.y) {
+            this.socket.handshake.match.eventStateSpecial = this.eventsState.freeFall
 
-                const distanceToStandingPlace = standingPlace - location.y
-                const fall = freeFall(location, distanceToStandingPlace)
-                console.log(fall, distanceToStandingPlace)
-                socket.handshake.match.endEventTime = Math.abs(new Date() + fall.time * 1000)
-                location.y = fall.location.y
-            } else {
-                socket.handshake.match.eventStateSpecial = this.eventsState.stand
-            }
+            const distanceToStandingPlace = standingPlace - location.y
+            const fall = freeFall(location, distanceToStandingPlace)
+            console.log(fall, distanceToStandingPlace)
+            this.socket.handshake.match.endEventTime = Math.abs(new Date() + fall.time * 1000)
+            location.y = fall.location.y
+        } else {
+            this.socket.handshake.match.eventStateSpecial = this.eventsState.stand
+        }
 
-            // console.log(mainShape, nearest)
-            console.log('right: ', location)
+        // console.log(mainShape, nearest)
+        console.log('right: ', location)
 
-            const specialEvent = socket.handshake.match.eventStateSpecial
-            io.to(socket.handshake.idRoom).emit(
+        const specialEvent = this.socket.handshake.match.eventStateSpecial
+        this.io
+            .to(this.socket.handshake.idRoom)
+            .emit(
                 this.EVENT,
                 new StickEventRes(this._id, event, location.x, location.y, specialEvent),
             )
-        }
     }
-    jumpLeft(socket, io) {
-        return async ({ event }) => {
-            console.log(
-                socket.handshake.match.eventStateSpecial,
-                this.eventsState.freeFall,
-                socket.handshake.match.eventStateSpecial === this.eventsState.freeFall,
-            )
-            if (socket.handshake.match.eventStateSpecial === this.eventsState.freeFall) return
-            this.setId(this.getId(socket))
-            const location = socket.handshake.match.players[this._id].stairGame
+    jumpLeft({ event }) {
+        console.log(
+            this.socket.handshake.match.eventStateSpecial,
+            this.eventsState.freeFall,
+            this.socket.handshake.match.eventStateSpecial === this.eventsState.freeFall,
+        )
+        if (this.socket.handshake.match.eventStateSpecial === this.eventsState.freeFall) return
+        this.setId(this.getId())
+        const location = this.socket.handshake.match.player.stairGame
 
-            location.vx = -4
-            location.vy = -10
-            this.updateLocation(location)
+        location.vx = -4
+        location.vy = -10
+        this.updateLocation(location)
 
-            const mainShape = createShapeStick(
-                location.x,
-                location.y,
-                config.stick.w * config.stick.scale,
-                config.stick.h * config.stick.scale,
-            )
-            const shapesStair = socket.handshake.match.stairs.map((stair) =>
-                createShapeStair(stair.x, stair.y, stair.width, stair.height),
-            )
-            const nearest = findNearest(mainShape, shapesStair)
+        const mainShape = createShapeStick(
+            location.x,
+            location.y,
+            config.stick.w * config.stick.scale,
+            config.stick.h * config.stick.scale,
+        )
+        const shapesStair = this.socket.handshake.match.stairs.map((stair) =>
+            createShapeStair(stair.x, stair.y, stair.width, stair.height),
+        )
+        const nearest = findNearest(mainShape, shapesStair)
+        const cardsShape = this.socket.handshake.match.cards.map((card) =>
+            createShapeCard(card.x, card.y, card.width, card.height),
+        )
 
-            // console.log(mainShape, nearest)
-            console.log('jump-left: ', location)
-            io.to(socket.handshake.idRoom).emit(
-                this.EVENT,
-                new StickEventRes(this._id, event, location.x, location.y),
-            )
-        }
+        // console.log(mainShape, nearest)
+        console.log('jump-left: ', location)
+        this.io
+            .to(this.socket.handshake.idRoom)
+            .emit(this.EVENT, new StickEventRes(this._id, event, location.x, location.y))
     }
-    jumpRight(socket, io) {
-        return async ({ event }) => {
-            if (socket.handshake.match.eventStateSpecial === this.eventsState.freeFall) return
-            this.setId(this.getId(socket))
-            const location = socket.handshake.match.players[this._id].stairGame
-            location.vx = 4
-            location.vy = -10
-            this.updateLocation(location)
+    jumpRight({ event }) {
+        if (this.socket.handshake.match.eventStateSpecial === this.eventsState.freeFall) return
+        this.setId(this.getId())
+        const location = this.socket.handshake.match.player.stairGame
+        location.vx = 4
+        location.vy = -10
+        this.updateLocation(location)
 
-            const mainShape = createShapeStick(
-                location.x,
-                location.y,
-                config.stick.w * config.stick.scale,
-                config.stick.h * config.stick.scale,
-            )
-            const shapesStair = socket.handshake.match.stairs.map((stair) =>
-                createShapeStair(stair.x, stair.y, stair.width, stair.height),
-            )
-            const nearest = findNearest(mainShape, shapesStair)
+        const mainShape = createShapeStick(
+            location.x,
+            location.y,
+            config.stick.w * config.stick.scale,
+            config.stick.h * config.stick.scale,
+        )
+        const shapesStair = this.socket.handshake.match.stairs.map((stair) =>
+            createShapeStair(stair.x, stair.y, stair.width, stair.height),
+        )
+        const nearest = findNearest(mainShape, shapesStair)
+        const cardsShape = this.socket.handshake.match.cards.map((card) =>
+            createShapeCard(card.x, card.y, card.width, card.height),
+        )
 
-            // console.log(mainShape, nearest)
-            console.log('jump-right: ', location)
-            io.to(socket.handshake.idRoom).emit(
-                this.EVENT,
-                new StickEventRes(this._id, event, location.x, location.y),
-            )
-        }
+        // console.log(mainShape, nearest)
+        console.log('jump-right: ', location)
+        this.io
+            .to(this.socket.handshake.idRoom)
+            .emit(this.EVENT, new StickEventRes(this._id, event, location.x, location.y))
     }
 }
 
@@ -332,5 +365,13 @@ function createShapeStair(x1, y1, w, h) {
         { x: x1, y: y1 + h },
     ]
 }
+function createShapeCard(x4, y4, w, h) {
+    return [
+        { x: x4, y: y4 - h },
+        { x: x4 + w, y: y4 - h },
+        { x: x4 + w, y: y4 },
+        { x: x4, y: y4 },
+    ]
+}
 
-module.exports = new stick()
+module.exports = Stick

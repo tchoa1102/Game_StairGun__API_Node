@@ -10,6 +10,10 @@
     "stair": {
         "maxWidth": 500
     },
+    "card": {
+        "width": 30.5,
+        "height": 44
+    },
     "stairGame": {
         "width": 1000,
         "height": 3500

@@ -10,4 +10,5 @@ module.exports = {
     StateEffectModel: require('./stateEffect.model'),
     RoomModel: require('./room.model'),
     PlayerOnMatchModel: require('./playerOnMatch.model'),
+    CardOnMatchModel: require('./cardOnMatch.model'),
 }

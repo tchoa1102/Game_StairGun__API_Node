@@ -7,5 +7,8 @@ const CardOnMatchModel = new Schema({
     x: { type: String, default: '0' },
     y: { type: String, default: '0' },
     isEnable: { type: Boolean, default: true },
+    pickUpTime: { type: String, default: new Date().toISOString() },
     owner: { type: Schema.ObjectId, default: null },
 })
+
+module.exports = mongoose.model('cardonmatches', CardOnMatchModel)

@@ -4,6 +4,8 @@ const Schema = mongoose.Schema
 const CardModel = new Schema({
     name: { type: String, required: true },
     type: { type: String, required: true },
+    src: { type: String, required: true },
+    match: { type: String, required: true },
 })
 
 module.exports = mongoose.model('cards', CardModel)
