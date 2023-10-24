@@ -49,7 +49,13 @@ class match {
                 })
                 if (allPlayerLoaded) {
                     console.log('action game')
-                    io.to(idRoom).emit('matches/start/res')
+                    setTimeout(
+                        ([idRoom]) => {
+                            io.to(idRoom).emit('matches/start/res')
+                        },
+                        5000,
+                        [idRoom],
+                    )
                 }
             } catch (error) {
                 console.log(error)

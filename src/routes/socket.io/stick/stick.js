@@ -1,17 +1,15 @@
 const math = require('mathjs')
 const config = require('../../../gameConfig.json')
 const StickEventRes = require('./stick..event.res')
-const { createLineFromTwoPoint, findIntersectionXLevel2 } = require('../../../shares')
 const CONSTANT_STICK = require('./CONSTANT')
+const CollisionCardRes = require('./collisionCard.res')
 
-// function getLocation(s) {
-//     return s?.handshake?.match?.players[this._id]
-// }
 class Stick {
     constructor(socket, io) {
         this.socket = socket
         this.io = io
         this.EVENT = 'stick-keyboard-event'
+        this.EVENT_COLLISION_CARD = 'stick/card/pick-up'
         this._id = this.socket.handshake.idPlayer
         this.vx = 4
         this.eventsState = { ...CONSTANT_STICK }
@@ -60,7 +58,7 @@ class Stick {
 
             const distanceToStandingPlace = standingPlace - location.y
             const fall = freeFall(location, distanceToStandingPlace)
-            console.log(fall, distanceToStandingPlace)
+            // console.log(fall, distanceToStandingPlace)
             this.socket.handshake.match.endEventTime = Math.abs(new Date() + fall.time * 1000)
             location.y = fall.location.y
         }
@@ -74,7 +72,7 @@ class Stick {
     }
     left({ event }) {
         this.setId(this.getId())
-        console.log(this.getId())
+        // console.log(this.getId())
         const location = this.socket.handshake.match.player.stairGame
 
         const mainShape = createShapeStick(
@@ -87,7 +85,12 @@ class Stick {
             createShapeStair(stair.x, stair.y, stair.width, stair.height),
         )
         const cardShapes = this.socket.handshake.match.cards.map((card) =>
-            createShapeCard(card.x, card.y, card.width, card.height),
+            createShapeCard(
+                JSON.parse(card.x),
+                JSON.parse(card.y),
+                config.card.width,
+                config.card.height,
+            ),
         )
 
         const nearest = findNearest(mainShape, stairShapes)
@@ -99,44 +102,111 @@ class Stick {
             location.vx = -Math.min(this.vx, distance)
             this.updateLocation(location)
         }
+        // #region check collision with card position left when stick move
+        const numOfCardsPickUp = this.socket.handshake.match.cards.reduce((total, card) => {
+            // console.log(card.owner, this._id, card.isEnable)
+            if (card.owner === this._id && card.isEnable) {
+                total += 1
+            }
+            return total
+        }, 0)
+        // console.log('Num of card pick up: ', numOfCardsPickUp)
         const distanceWithCard = mainShape[0].x - nearestCards.leftNearest[1].x
-        const distanceWithBottomCard = mainShape[0].x - nearestCards.bottomNearest[1].x
-        if (distanceWithCard <= 0) {
-            for (const card of socket.handshake.match.cards) {
-                if (
-                    card.x === nearestCards.leftNearest[3].x &&
-                    card.y === nearestCards.leftNearest[3].y &&
-                    !card.owner
-                ) {
-                    card.isShow = false
+        // console.log('\ndistanceWithCard: ', distanceWithCard, ', location: ', location.vx, '\n')
+        if (
+            Number.isFinite(distanceWithCard) &&
+            distanceWithCard <= Math.abs(location.vx) &&
+            numOfCardsPickUp < 5
+        ) {
+            // console.log('\n\nCollision!\n\n')
+            for (const card of this.socket.handshake.match.cards) {
+                if (JSON.parse(card.x) === nearestCards.leftNearest[3].x && !card.owner) {
+                    // console.log('\n\nHave card\n\n')
                     card.owner = this._id
                     // sendEvent
+                    this.io
+                        .to(this.socket.handshake.idRoom)
+                        .emit(
+                            this.EVENT_COLLISION_CARD,
+                            new CollisionCardRes(0, this._id, card._id),
+                        )
                 }
             }
         }
+        // #endregion check collision with card position left when stick move
+
+        // #region check stick free fall
         const standingPlace = Math.min(config.stairGame.height, nearest.bottomNearest[0].y)
+        // console.log(this.socket.handshake.match.cards, nearestCards)
         if (standingPlace > location.y) {
+            // console.log('Fall')
+            // #region check, do stick have collision with card position bottom of stick
+            const numOfCardsPickUp = this.socket.handshake.match.cards.reduce((total, card) => {
+                if (card.owner === this._id && !card.isEnable) {
+                    total += 1
+                }
+                return total
+            }, 0)
+            const cardBottomCollision = nearestCards.bottomNearest[0].y
+            // console.log(
+            //     nearestCards.bottomNearest,
+            //     numOfCardsPickUp,
+            //     cardBottomCollision,
+            //     location.y,
+            // )
+            if (
+                Number.isFinite(cardBottomCollision) &&
+                numOfCardsPickUp < 5 &&
+                cardBottomCollision >= location.y
+            ) {
+                const distanceWithBottomCard = cardBottomCollision - location.y
+                const cardPickedUp = this.socket.handshake.match.cards.find(
+                    (card) =>
+                        JSON.parse(card.x) === nearestCards.bottomNearest[3].x &&
+                        JSON.parse(card.y) === nearestCards.bottomNearest[3].y,
+                )
+                // console.log(
+                //     'Pick up: ',
+                //     cardPickedUp,
+                //     cardBottomCollision,
+                //     location.y,
+                //     distanceWithBottomCard,
+                // )
+                if (cardPickedUp && !cardPickedUp.owner) {
+                    const fall = freeFall(location, distanceWithBottomCard)
+                    // computed collision's time
+                    const timeMilliSeconds = fall.time * 1000
+                    // console.log(
+                    //     '\nTime collision with card: ',
+                    //     timeMilliSeconds,
+                    //     ', distance: ',
+                    //     distanceWithBottomCard,
+                    //     ', local: ',
+                    //     location,
+                    // )
+                    cardPickedUp.timeOut = setTimeout(
+                        timeOutUpdateCard.bind(this),
+                        timeMilliSeconds,
+                        [this._id, cardPickedUp],
+                    )
+                }
+            }
+            // #endregion check, do stick have collision with card position bottom of stick
+
+            // #region handle fall
             this.socket.handshake.match.eventStateSpecial = this.eventsState.freeFall
 
             const distanceToStandingPlace = standingPlace - location.y
             const fall = freeFall(location, distanceToStandingPlace)
-            console.log(fall, distanceToStandingPlace)
-            this.socket.handshake.match.endEventTime = Math.abs(new Date() + fall.time * 1000)
+            // console.log(fall, distanceToStandingPlace)
+            const timeMilliSeconds = fall.time * 1000
+            this.socket.handshake.match.endEventTime = Math.abs(new Date() + timeMilliSeconds)
+            // #endregion handle fall
             location.y = fall.location.y
-
-            if (distanceWithBottomCard <= distanceToStandingPlace) {
-                const cardPickedUp = this.socket.handshake.match.cards.find(
-                    (card) =>
-                        card.x === nearestCards.bottomNearest[3].x &&
-                        card.y === nearestCards.bottomNearest[3].y,
-                )
-                cardPickedUp.pickUpTime = new Date().toISOString()
-                cardPickedUp.owner = this._id
-                cardPickedUp.isShow = false
-            }
         } else {
             this.socket.handshake.match.eventStateSpecial = this.eventsState.stand
         }
+        // #endregion check stick free fall
 
         // console.log(mainShape, nearest)
         console.log('left: ', location)
@@ -162,27 +232,126 @@ class Stick {
             createShapeStair(stair.x, stair.y, stair.width, stair.height),
         )
         const nearest = findNearest(mainShape, stairShapes)
-        const cardsShape = this.socket.handshake.match.cards.map((card) =>
-            createShapeCard(card.x, card.y, card.width, card.height),
+        const cardShapes = this.socket.handshake.match.cards.map((card) =>
+            createShapeCard(
+                JSON.parse(card.x),
+                JSON.parse(card.y),
+                config.card.width,
+                config.card.height,
+            ),
         )
+        const nearestCards = findNearest(mainShape, cardShapes)
         const distance = nearest.rightNearest[0].x - mainShape[1].x
 
         if (!Number.isFinite(nearest.rightNearest[1].x) || distance > 0) {
             location.vx = Math.min(this.vx, distance)
             this.updateLocation(location)
         }
+
+        // #region check collision with card position right when stick move
+        const numOfCardsPickUp = this.socket.handshake.match.cards.reduce((total, card) => {
+            // console.log(card.owner, this._id, card.isEnable)
+            if (card.owner === this._id && card.isEnable) {
+                total += 1
+            }
+            return total
+        }, 0)
+        // console.log('Num of card pick up: ', numOfCardsPickUp)
+        const distanceWithCard = nearestCards.rightNearest[0].x - mainShape[1].x
+        // console.log('\nMx: ', mainShape[1].x, ', Nx: ', nearestCards.rightNearest[0].x, 'distanceWithCard: ', distanceWithCard, ', location: ', location.vx, '\n',)
+        if (
+            Number.isFinite(distanceWithCard) &&
+            distanceWithCard <= Math.abs(location.vx) &&
+            numOfCardsPickUp < 5
+        ) {
+            // console.log('\n\nCollision!\n\n')
+            for (const card of this.socket.handshake.match.cards) {
+                if (JSON.parse(card.x) === nearestCards.rightNearest[3].x && !card.owner) {
+                    // console.log('\n\nHave card\n\n')
+                    card.owner = this._id
+                    // sendEvent
+                    this.io
+                        .to(this.socket.handshake.idRoom)
+                        .emit(
+                            this.EVENT_COLLISION_CARD,
+                            new CollisionCardRes(0, this._id, card._id),
+                        )
+                }
+            }
+        }
+        // #endregion check collision with card position right when stick move
+
+        // #region check stick free fall
         const standingPlace = Math.min(config.stairGame.height, nearest.bottomNearest[0].y)
         if (standingPlace > location.y) {
+            // console.log(this.socket.handshake.match.cards, nearestCards)
+            // console.log('Fall')
+            // #region check, do stick have collision with card position bottom of stick
+            const numOfCardsPickUp = this.socket.handshake.match.cards.reduce((total, card) => {
+                if (card.owner === this._id && !card.isEnable) {
+                    total += 1
+                }
+                return total
+            }, 0)
+            const cardBottomCollision = nearestCards.bottomNearest[0].y
+            // console.log(
+            //     nearestCards.bottomNearest,
+            //     numOfCardsPickUp,
+            //     cardBottomCollision,
+            //     location.y,
+            // )
+            if (
+                Number.isFinite(cardBottomCollision) &&
+                numOfCardsPickUp < 5 &&
+                cardBottomCollision >= location.y
+            ) {
+                const distanceWithBottomCard = cardBottomCollision - location.y
+                const cardPickedUp = this.socket.handshake.match.cards.find(
+                    (card) =>
+                        JSON.parse(card.x) === nearestCards.bottomNearest[3].x &&
+                        JSON.parse(card.y) === nearestCards.bottomNearest[3].y,
+                )
+                // console.log(
+                //     'Pick up: ',
+                //     cardPickedUp,
+                //     cardBottomCollision,
+                //     location.y,
+                //     distanceWithBottomCard,
+                // )
+                if (cardPickedUp && !cardPickedUp.owner) {
+                    const fall = freeFall(location, distanceWithBottomCard)
+                    // computed collision's time
+                    const timeMilliSeconds = fall.time * 1000
+                    // console.log(
+                    //     '\nTime collision with card: ',
+                    //     timeMilliSeconds,
+                    //     ', distance: ',
+                    //     distanceWithBottomCard,
+                    //     ', local: ',
+                    //     location,
+                    // )
+                    cardPickedUp.timeOut = setTimeout(
+                        timeOutUpdateCard.bind(this),
+                        timeMilliSeconds,
+                        [this._id, cardPickedUp],
+                    )
+                }
+            }
+            // #endregion check, do stick have collision with card position bottom of stick
+
+            // #region handle fall
             this.socket.handshake.match.eventStateSpecial = this.eventsState.freeFall
 
             const distanceToStandingPlace = standingPlace - location.y
             const fall = freeFall(location, distanceToStandingPlace)
-            console.log(fall, distanceToStandingPlace)
+            // console.log(fall, distanceToStandingPlace)
             this.socket.handshake.match.endEventTime = Math.abs(new Date() + fall.time * 1000)
+            // #endregion handle fall
             location.y = fall.location.y
         } else {
             this.socket.handshake.match.eventStateSpecial = this.eventsState.stand
         }
+        // #endregion check stick free fall
 
         // console.log(mainShape, nearest)
         console.log('right: ', location)
@@ -196,11 +365,11 @@ class Stick {
             )
     }
     jumpLeft({ event }) {
-        console.log(
-            this.socket.handshake.match.eventStateSpecial,
-            this.eventsState.freeFall,
-            this.socket.handshake.match.eventStateSpecial === this.eventsState.freeFall,
-        )
+        // console.log(
+        //     this.socket.handshake.match.eventStateSpecial,
+        //     this.eventsState.freeFall,
+        //     this.socket.handshake.match.eventStateSpecial === this.eventsState.freeFall,
+        // )
         if (this.socket.handshake.match.eventStateSpecial === this.eventsState.freeFall) return
         this.setId(this.getId())
         const location = this.socket.handshake.match.player.stairGame
@@ -209,19 +378,19 @@ class Stick {
         location.vy = -10
         this.updateLocation(location)
 
-        const mainShape = createShapeStick(
-            location.x,
-            location.y,
-            config.stick.w * config.stick.scale,
-            config.stick.h * config.stick.scale,
-        )
-        const shapesStair = this.socket.handshake.match.stairs.map((stair) =>
-            createShapeStair(stair.x, stair.y, stair.width, stair.height),
-        )
-        const nearest = findNearest(mainShape, shapesStair)
-        const cardsShape = this.socket.handshake.match.cards.map((card) =>
-            createShapeCard(card.x, card.y, card.width, card.height),
-        )
+        // const mainShape = createShapeStick(
+        //     location.x,
+        //     location.y,
+        //     config.stick.w * config.stick.scale,
+        //     config.stick.h * config.stick.scale,
+        // )
+        // const shapesStair = this.socket.handshake.match.stairs.map((stair) =>
+        //     createShapeStair(stair.x, stair.y, stair.width, stair.height),
+        // )
+        // const nearest = findNearest(mainShape, shapesStair)
+        // const cardsShape = this.socket.handshake.match.cards.map((card) =>
+        //     createShapeCard(card.x, card.y, card.width, card.height),
+        // )
 
         // console.log(mainShape, nearest)
         console.log('jump-left: ', location)
@@ -237,19 +406,19 @@ class Stick {
         location.vy = -10
         this.updateLocation(location)
 
-        const mainShape = createShapeStick(
-            location.x,
-            location.y,
-            config.stick.w * config.stick.scale,
-            config.stick.h * config.stick.scale,
-        )
-        const shapesStair = this.socket.handshake.match.stairs.map((stair) =>
-            createShapeStair(stair.x, stair.y, stair.width, stair.height),
-        )
-        const nearest = findNearest(mainShape, shapesStair)
-        const cardsShape = this.socket.handshake.match.cards.map((card) =>
-            createShapeCard(card.x, card.y, card.width, card.height),
-        )
+        // const mainShape = createShapeStick(
+        //     location.x,
+        //     location.y,
+        //     config.stick.w * config.stick.scale,
+        //     config.stick.h * config.stick.scale,
+        // )
+        // const shapesStair = this.socket.handshake.match.stairs.map((stair) =>
+        //     createShapeStair(stair.x, stair.y, stair.width, stair.height),
+        // )
+        // const nearest = findNearest(mainShape, shapesStair)
+        // const cardsShape = this.socket.handshake.match.cards.map((card) =>
+        //     createShapeCard(card.x, card.y, card.width, card.height),
+        // )
 
         // console.log(mainShape, nearest)
         console.log('jump-right: ', location)
@@ -259,13 +428,64 @@ class Stick {
     }
 }
 
+function timeOutUpdateCard([_id, card]) {
+    console.log('Arguments: ', card._id)
+    let cardFound = null
+    const numOfCardsPickUp = this.socket.handshake.match.cards.reduce((total, curCard) => {
+        // console.log(card.owner, _id, card.isEnable)
+        if (card._id === curCard._id) cardFound = card
+        if (curCard.owner === _id && curCard.isEnable) {
+            total += 1
+        }
+        return total
+    }, 0)
+    // console.log(numOfCardsPickUp)
+    if (numOfCardsPickUp < 5 && cardFound) {
+        const location = this.socket.handshake.match.player.stairGame
+        const shapeStick = createShapeStick(
+            location.x,
+            location.y,
+            config.stick.w * config.stick.scale,
+            config.stick.h * config.stick.scale,
+        )
+        const shapeCard = createShapeCard(
+            JSON.parse(cardFound.x),
+            JSON.parse(cardFound.y),
+            config.card.width,
+            config.card.height,
+        )
+        const checkCollisionX =
+            (shapeStick[0].x >= shapeCard[0].x && shapeStick[0].x <= shapeCard[1].x) ||
+            (shapeStick[1].x >= shapeCard[0].x && shapeStick[1].x <= shapeCard[1].x) ||
+            (shapeStick[0].x <= shapeCard[0].x && shapeStick[1].x >= shapeCard[1].x)
+        const checkCollisionY =
+            (shapeStick[0].y >= shapeCard[0].y && shapeStick[0].y <= shapeCard[3].y) ||
+            (shapeStick[3].y >= shapeStick[0].y && shapeStick[3].y <= shapeCard[3].y) ||
+            (shapeStick[0].y <= shapeCard[0].y && shapeStick[3].y >= shapeCard[3].y)
+        if (checkCollisionX && checkCollisionY && !cardFound.owner) {
+            // console.log('\n\nHave card\n\n')
+            cardFound.owner = _id
+            // sendEvent
+            this.io
+                .to(this.socket.handshake.idRoom)
+                .emit(this.EVENT_COLLISION_CARD, new CollisionCardRes(0, _id, cardFound._id))
+        }
+    }
+}
+
 function freeFall({ x, y }, kDistance) {
     // s = v0t + 1/2g*t^2, with g = 10 m/s^2, v0 = 0
     // => s = 1/2 * 10 * t^2 (m), set 1m = 1pixel
     // => t = sqrt(2 * s / 10 ) = sqrt(2 * kDistance / 10)
     // => t = 0 <=> kDistance = 0 => no distance => can move
     return {
-        time: Math.sqrt((2 * kDistance) / 10),
+        // this free fall
+        // time: Math.sqrt((2 * kDistance) / 10),
+        // location: {
+        //     x,
+        //     y: y + kDistance,
+        // },
+        time: kDistance / 616.23, // v = 616.23 pixel/s
         location: {
             x,
             y: y + kDistance,
