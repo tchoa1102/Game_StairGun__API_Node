@@ -2,12 +2,19 @@ const { CardOnMatchModel, CardModel } = require('../models')
 const config = require('../../gameConfig.json')
 
 class CardController {
+    async getAll(req, res, next) {
+        const cards = await CardModel.find({}).lean()
+
+        return res.json(cards)
+    }
+
     async createListCards(idMatch, stairs) {
         // @return Array[]
         const cardsModel = await CardModel.find().lean()
         const cards = []
+        const cardsDetail = []
         const stairsPassed = []
-        console.log(cards.length, config.maxCard, stairsPassed.length, stairs.length)
+        // console.log(cards.length, config.maxCard, stairsPassed.length, stairs.length)
         while (cards.length < config.maxCard) {
             // find unique stair
             let i = Math.floor(Math.random() * stairs.length)
@@ -29,12 +36,16 @@ class CardController {
                 match: idMatch,
                 data: cardSelected._id,
             })
+            await card.save()
+            const cardDetail = card.toObject()
+            cardDetail.data = cardSelected
             cards.push(card)
+            cardsDetail.push(cardDetail)
         }
 
         // console.log('Card created: ', cards)
 
-        return cards
+        return { cards, cardsDetail }
     }
 }
 

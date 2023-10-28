@@ -123,7 +123,8 @@ class room {
                     })
                     const maps = await MapModel.find()
                     const mapChosenIndex = Math.floor(Math.random() * maps.length)
-                    const map = maps[mapChosenIndex]
+                    const map = maps[mapChosenIndex].populate('srcConfigs.data')
+                    console.log('\n\nMap: ', map)
                     const configCircleStick = characters[0].srcConfig
 
                     const timeStart = new Date().toISOString()
@@ -135,9 +136,10 @@ class room {
                         map: map._id,
                     })
 
-                    const cards = await cardController.createListCards(newMatch._id, listStair)
+                    const cardsData = await cardController.createListCards(newMatch._id, listStair)
+                    const cards = cardsData.cards
 
-                    // #region init players
+                    // #region convert players
                     const players = []
                     for (const p of room.players) {
                         if (p.isOnRoom) {
@@ -150,12 +152,20 @@ class room {
                                 mainGame: {
                                     x: 10,
                                     y: 10,
+                                    characterGradient: '0',
                                     hp: dataPlayer.HP,
                                     sta: dataPlayer.STA,
                                     atk: dataPlayer.ATK,
                                     def: dataPlayer.DEF,
                                     luk: dataPlayer.LUK,
                                     agi: dataPlayer.AGI,
+                                    skillsUsing: [],
+                                    cardsUsing: [],
+                                    gunAngel: '0',
+                                    gunZone: {
+                                        begin: '0',
+                                        end: '90',
+                                    },
                                     stateEffects: [],
                                 },
                                 stairGame: {
@@ -173,7 +183,7 @@ class room {
                             players.push(player)
                         }
                     }
-                    // #endregion init players
+                    // #endregion convert players
                     players.forEach((player) => {
                         const data = {
                             match: newMatch._id,
@@ -181,7 +191,7 @@ class room {
                             curTiled: '',
 
                             stairs: listStair,
-                            cards,
+                            cards: cardsData.cardsDetail,
                             timeStart: timeStart,
                             players: players.map((p) => p.target),
                             player,
@@ -191,10 +201,8 @@ class room {
                         io.sockets.sockets.get(player.target.socketId).handshake.match = data
                     })
 
-                    // console.log(socket.handshake.match)
-
                     await newMatch.save()
-                    // console.log('Create match: ', newMatch)
+                    console.log('Create match: ', newMatch)
 
                     const dataMatchRes = {
                         ...newMatch.toObject(),
@@ -206,7 +214,7 @@ class room {
                     }
 
                     const dataRes = new MatchRes(dataMatchRes, configCircleStick, map.srcConfig)
-                    // console.log(dataRes)
+                    console.log(dataRes)
                     return io.to(idRoom).emit('matches/create/res', {
                         data: dataRes,
                     })

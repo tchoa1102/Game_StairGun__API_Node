@@ -12,6 +12,11 @@ const playerOnMainGameSchema = new Schema({
     luk: { type: String, default: '0' },
     agi: { type: String, default: '0' },
     power_point: { type: Number, default: 0 },
+    gunAngel: { type: String, default: '0' },
+    gunZone: {
+        begin: { type: String, default: '0' },
+        end: { type: String, default: '0' },
+    },
     stateEffects: [
         {
             data: { type: ObjectId, ref: 'stateeffects' },

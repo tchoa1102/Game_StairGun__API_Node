@@ -60,6 +60,8 @@ class Middleware {
                     id = id + '1'
                 }
                 socket.handshake.idPlayer = id
+                const user = await UserModel.findById(id).lean()
+                socket.handshake.namePlayer = user.name
                 next()
             }
         } catch (error) {

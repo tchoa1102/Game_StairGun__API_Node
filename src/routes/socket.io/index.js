@@ -41,12 +41,20 @@ const playersOnMatch = [
         mainGame: {
             x: 10,
             y: 10,
+            characterGradient: '0',
             hp: '100',
             sta: '100',
             atk: '10',
             def: '5',
             luk: '5',
             agi: '5',
+            skillsUsing: [],
+            cardsUsing: [],
+            gunAngel: '0',
+            gunZone: {
+                begin: '0',
+                end: '90',
+            },
             stateEffects: [],
         },
         stairGame: { x: 434.6562286730177, y: config.stairGame.height },
@@ -84,12 +92,20 @@ const playersOnMatch = [
         mainGame: {
             x: 10,
             y: 10,
+            characterGradient: '0',
             hp: '100',
             sta: '100',
             atk: '10',
             def: '5',
             luk: '5',
             agi: '5',
+            skillsUsing: [],
+            cardsUsing: [],
+            gunAngel: '0',
+            gunZone: {
+                begin: '0',
+                end: '90',
+            },
             stateEffects: [],
         },
         stairGame: { x: 307.3022282869877, y: config.stairGame.height - 1000, vx: 0, vy: 0 },
@@ -103,12 +119,20 @@ const playerData = {
     mainGame: {
         x: 10,
         y: 10,
+        characterGradient: '0',
         hp: '100',
         sta: '100',
         atk: '10',
         def: '5',
         luk: '5',
         agi: '5',
+        skillsUsing: [],
+        cardsUsing: [],
+        gunAngel: '0',
+        gunZone: {
+            begin: '0',
+            end: '90',
+        },
         stateEffects: [],
     },
     stairGame: { x: 307.3022282869877, y: config.stairGame.height - 1000, vx: 0, vy: 0 },
@@ -117,7 +141,13 @@ const playerData = {
 const cards = [
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '956.8911654325373',
         y: '1837.383542596282',
         isEnable: true,
@@ -126,7 +156,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '692.2091676259495',
         y: '1048.316176614449',
         isEnable: true,
@@ -135,7 +171,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '699.5530284162518',
         y: '2001.2854829488706',
         isEnable: true,
@@ -144,7 +186,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '495.65142691191295',
         y: '2091.411711893028',
         isEnable: true,
@@ -153,7 +201,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '603.7631225534885',
         y: '2523.3750860377777',
         isEnable: true,
@@ -162,7 +216,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '661.5130617348921',
         y: '2235.6497937131667',
         isEnable: true,
@@ -171,7 +231,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '313.1465298499701',
         y: '882.4726356433279',
         isEnable: true,
@@ -180,7 +246,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '935.5219267611408',
         y: '2388.211816642428',
         isEnable: true,
@@ -189,7 +261,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '943.4921692237422',
         y: '1861.6170788944946',
         isEnable: true,
@@ -198,7 +276,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '437.02499513910175',
         y: '2933.704439919664',
         isEnable: true,
@@ -207,7 +291,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '487.2263854133936',
         y: '1294.9814158235986',
         isEnable: true,
@@ -216,7 +306,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '371.5711269815265',
         y: '1032.749288804198',
         isEnable: true,
@@ -225,7 +321,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '1036.1497659918077',
         y: '1282.5292800179486',
         isEnable: true,
@@ -234,7 +336,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '912.074449502774',
         y: '2567.32018022718',
         isEnable: true,
@@ -243,7 +351,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '383.7095011597388',
         y: '2026.2585757574475',
         isEnable: true,
@@ -252,7 +366,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '676.5170650467353',
         y: '514.9719480943346',
         isEnable: true,
@@ -261,7 +381,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '698.4700478160179',
         y: '2315.8801672309028',
         isEnable: true,
@@ -270,7 +396,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '248.8641002519887',
         y: '796.8349917104338',
         isEnable: true,
@@ -279,7 +411,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '454.99429336613105',
         y: '949.5994946561497',
         isEnable: true,
@@ -288,7 +426,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '584.9038455292908',
         y: '2803.9415722399053',
         isEnable: true,
@@ -297,7 +441,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '799.0422689180893',
         y: '2710.1024542653927',
         isEnable: true,
@@ -306,7 +456,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '758.3428028439381',
         y: '1703.6406584450367',
         isEnable: true,
@@ -315,7 +471,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '320.3668753773864',
         y: '630.7687700026247',
         isEnable: true,
@@ -324,7 +486,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '568.3798553321076',
         y: '1252.919033143089',
         isEnable: true,
@@ -333,7 +501,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '667.479012718987',
         y: '371.7807626981066',
         isEnable: true,
@@ -342,7 +516,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '1042.1918037974626',
         y: '334.95402028804097',
         isEnable: true,
@@ -351,7 +531,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '90.64836700496465',
         y: '582.7504775364962',
         isEnable: true,
@@ -360,7 +546,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '524.7338606165441',
         y: '646.3782062129188',
         isEnable: true,
@@ -369,7 +561,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '733.467015476059',
         y: '2380.6154281607182',
         isEnable: true,
@@ -378,7 +576,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '322.2007489763568',
         y: '2323.4304259112814',
         isEnable: true,
@@ -387,7 +591,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '490.359040052833',
         y: '2283.2408994106536',
         isEnable: true,
@@ -396,7 +606,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '434.151575522744',
         y: '1589.7090569043917',
         isEnable: true,
@@ -405,7 +621,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '874.0809498522618',
         y: '3254.225490348762',
         isEnable: true,
@@ -414,7 +636,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '800.2044258128274',
         y: '2520.3754817868903',
         isEnable: true,
@@ -423,7 +651,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '660.1447533958992',
         y: '3016.554948531761',
         isEnable: true,
@@ -432,7 +666,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '200.52135735368506',
         y: '1157.9041501130532',
         isEnable: true,
@@ -441,7 +681,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '232.6897353418818',
         y: '1593.60717617207',
         isEnable: true,
@@ -450,7 +696,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '842.1140006540488',
         y: '1365.039147522112',
         isEnable: true,
@@ -459,7 +711,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa293db5f87468210b950',
+        data: {
+            _id: '652fa293db5f87468210b950',
+            name: 'Double damage',
+            type: 'x2',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png',
+            match: 'CardDoubleDamage',
+        },
         x: '474.78981226374077',
         y: '2842.3065724982534',
         isEnable: true,
@@ -468,7 +726,13 @@ const cards = [
     },
     {
         timeOut: null,
-        data: '652fa2d4db5f87468210b951',
+        data: {
+            _id: '652fa2d4db5f87468210b951',
+            name: 'Neutralization',
+            type: 'neutralization',
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png',
+            match: 'CardNeutralization',
+        },
         x: '646.6239337653819',
         y: '972.7515478889699',
         isEnable: true,
@@ -892,9 +1156,7 @@ module.exports = function (io) {
             timeStart: '2023-10-13T08:10:37.875Z',
             players: playersOnMatch.reduce((result, player) => {
                 result[player.target._id.toString()] = {}
-                result[player.target._id.toString()] = {
-                    ...player.target,
-                }
+                result[player.target._id.toString()] = player.target
 
                 return result
             }, {}),

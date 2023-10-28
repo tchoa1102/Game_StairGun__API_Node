@@ -11,4 +11,5 @@ module.exports = {
     RoomModel: require('./room.model'),
     PlayerOnMatchModel: require('./playerOnMatch.model'),
     CardOnMatchModel: require('./cardOnMatch.model'),
+    MessageModel: require('./message.model'),
 }

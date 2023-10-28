@@ -128,7 +128,7 @@ class Stick {
                         .to(this.socket.handshake.idRoom)
                         .emit(
                             this.EVENT_COLLISION_CARD,
-                            new CollisionCardRes(0, this._id, card._id),
+                            new CollisionCardRes(0, this._id, card._id, card.data),
                         )
                 }
             }
@@ -274,7 +274,7 @@ class Stick {
                         .to(this.socket.handshake.idRoom)
                         .emit(
                             this.EVENT_COLLISION_CARD,
-                            new CollisionCardRes(0, this._id, card._id),
+                            new CollisionCardRes(0, this._id, card._id, card.data),
                         )
                 }
             }
@@ -365,11 +365,6 @@ class Stick {
             )
     }
     jumpLeft({ event }) {
-        // console.log(
-        //     this.socket.handshake.match.eventStateSpecial,
-        //     this.eventsState.freeFall,
-        //     this.socket.handshake.match.eventStateSpecial === this.eventsState.freeFall,
-        // )
         if (this.socket.handshake.match.eventStateSpecial === this.eventsState.freeFall) return
         this.setId(this.getId())
         const location = this.socket.handshake.match.player.stairGame
@@ -377,22 +372,6 @@ class Stick {
         location.vx = -4
         location.vy = -10
         this.updateLocation(location)
-
-        // const mainShape = createShapeStick(
-        //     location.x,
-        //     location.y,
-        //     config.stick.w * config.stick.scale,
-        //     config.stick.h * config.stick.scale,
-        // )
-        // const shapesStair = this.socket.handshake.match.stairs.map((stair) =>
-        //     createShapeStair(stair.x, stair.y, stair.width, stair.height),
-        // )
-        // const nearest = findNearest(mainShape, shapesStair)
-        // const cardsShape = this.socket.handshake.match.cards.map((card) =>
-        //     createShapeCard(card.x, card.y, card.width, card.height),
-        // )
-
-        // console.log(mainShape, nearest)
         console.log('jump-left: ', location)
         this.io
             .to(this.socket.handshake.idRoom)
@@ -405,22 +384,6 @@ class Stick {
         location.vx = 4
         location.vy = -10
         this.updateLocation(location)
-
-        // const mainShape = createShapeStick(
-        //     location.x,
-        //     location.y,
-        //     config.stick.w * config.stick.scale,
-        //     config.stick.h * config.stick.scale,
-        // )
-        // const shapesStair = this.socket.handshake.match.stairs.map((stair) =>
-        //     createShapeStair(stair.x, stair.y, stair.width, stair.height),
-        // )
-        // const nearest = findNearest(mainShape, shapesStair)
-        // const cardsShape = this.socket.handshake.match.cards.map((card) =>
-        //     createShapeCard(card.x, card.y, card.width, card.height),
-        // )
-
-        // console.log(mainShape, nearest)
         console.log('jump-right: ', location)
         this.io
             .to(this.socket.handshake.idRoom)
@@ -468,7 +431,10 @@ function timeOutUpdateCard([_id, card]) {
             // sendEvent
             this.io
                 .to(this.socket.handshake.idRoom)
-                .emit(this.EVENT_COLLISION_CARD, new CollisionCardRes(0, _id, cardFound._id))
+                .emit(
+                    this.EVENT_COLLISION_CARD,
+                    new CollisionCardRes(0, _id, cardFound._id, cardFound.data),
+                )
         }
     }
 }
