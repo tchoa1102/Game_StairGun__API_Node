@@ -12,4 +12,5 @@ module.exports = {
     PlayerOnMatchModel: require('./playerOnMatch.model'),
     CardOnMatchModel: require('./cardOnMatch.model'),
     MessageModel: require('./message.model'),
+    FriendModel: require('./friend.model'),
 }

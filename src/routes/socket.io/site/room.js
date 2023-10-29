@@ -123,7 +123,7 @@ class room {
                     })
                     const maps = await MapModel.find()
                     const mapChosenIndex = Math.floor(Math.random() * maps.length)
-                    const map = maps[mapChosenIndex].populate('srcConfigs.data')
+                    const map = await maps[mapChosenIndex].populate('objects.data')
                     console.log('\n\nMap: ', map)
                     const configCircleStick = characters[0].srcConfig
 
@@ -213,7 +213,12 @@ class room {
                         cards,
                     }
 
-                    const dataRes = new MatchRes(dataMatchRes, configCircleStick, map.srcConfig)
+                    const dataRes = new MatchRes(
+                        dataMatchRes,
+                        configCircleStick,
+                        map.objects,
+                        map.backgroundGunGame,
+                    )
                     console.log(dataRes)
                     return io.to(idRoom).emit('matches/create/res', {
                         data: dataRes,
@@ -416,6 +421,61 @@ class room {
             // console.log(rooms[rooms.length - 1])
 
             socket.emit('rooms/players/goOut/res')
+        }
+    }
+
+    deletePlayer(socket, io) {
+        return async (idPlayer) => {
+            const player = await UserModel.findById(idPlayer).lean()
+            const rooms = await RoomModel.find({
+                'players.player': idPlayer,
+                'players.isOnRoom': true,
+            }).lean()
+
+            for (const room of rooms) {
+                let isDelete = false
+                room.players.forEach((p) => {
+                    if (p.player.toString() === socket.handshake.idPlayer && p.isRoomMaster) {
+                        isDelete = true
+                        if (p.player.toString() === idPlayer) {
+                            p.isOnRoom = false
+                            let newMaster = undefined
+                            if (p.isRoomMaster) {
+                                p.isRoomMaster = false
+                                const otherP = room.players.find(
+                                    (p) => p.isOnRoom && p.player.toString() !== idPlayer,
+                                )
+
+                                if (otherP) {
+                                    otherP.isRoomMaster = true
+                                    newMaster = otherP.player
+                                }
+                            }
+                            console.log('emit ', room._id.toString())
+                            io.sockets.sockets
+                                .get(player.socketId)
+                                .to(room._id.toString())
+                                .emit('rooms/players/remove/res', {
+                                    data: new RoomPlayerRemoveRes({
+                                        player: idPlayer,
+                                        position: p.position,
+                                        newMaster,
+                                    }),
+                                })
+                        }
+                    }
+                })
+                if (isDelete) {
+                    io.sockets.sockets.get(player.socketId).leave(room._id.toString())
+                    io.sockets.sockets.get(player.socketId).handshake.idRoom = undefined
+                    // console.log(room)
+                    await RoomModel.updateOne({ _id: room._id }, room)
+                    io.emit('rooms', { type: 'update', data: new RoomAddRes(room) })
+                }
+            }
+            // console.log(rooms[rooms.length - 1])
+
+            io.sockets.sockets.get(player.socketId).emit('rooms/players/goOut/res')
         }
     }
 }

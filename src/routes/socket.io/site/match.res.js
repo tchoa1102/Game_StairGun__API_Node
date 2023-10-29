@@ -1,5 +1,5 @@
 class MatchRes {
-    constructor(matchData, stickConfig, tiledMapConfig) {
+    constructor(matchData, stickConfig, objects, backgroundGunGame) {
         this._id = matchData._id
         this.stairs = matchData.stairs
         this.timeStart = matchData.timeStart
@@ -7,7 +7,8 @@ class MatchRes {
         this.cards = matchData.cards
         this.backgroundStairGame = matchData.backgroundStairGame
         this.stickConfig = stickConfig
-        this.tiledMapConfig = tiledMapConfig
+        this.objects = objects
+        this.backgroundGunGame = backgroundGunGame
     }
 }
 
