@@ -18,7 +18,7 @@ module.exports = function (socket, io) {
     )
     socket.on(
         'rooms/players/delete',
-        async ({ idPlayer }) => await room.deletePlayer(socket, io)({ idPlayer }),
+        async ({ _id }) => await room.deletePlayer(socket, io)({ _id }),
     )
 
     socket.on(

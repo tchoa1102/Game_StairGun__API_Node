@@ -425,52 +425,45 @@ class room {
     }
 
     deletePlayer(socket, io) {
-        return async (idPlayer) => {
-            const player = await UserModel.findById(idPlayer).lean()
+        return async ({ _id }) => {
+            const player = await UserModel.findById(_id).lean()
             const rooms = await RoomModel.find({
-                'players.player': idPlayer,
+                'players.player': _id,
                 'players.isOnRoom': true,
             }).lean()
 
             for (const room of rooms) {
                 let isDelete = false
-                room.players.forEach((p) => {
-                    if (p.player.toString() === socket.handshake.idPlayer && p.isRoomMaster) {
-                        isDelete = true
-                        if (p.player.toString() === idPlayer) {
+                console.log('deleting..., ', room.players)
+                const canDelete = room.players.some(
+                    (p) => p.player.toString() === socket.handshake.idPlayer && p.isRoomMaster,
+                )
+                if (canDelete) {
+                    room.players.forEach((p) => {
+                        console.log('find..., ', p.player.toString(), _id)
+                        if (p.player.toString() === _id) {
+                            console.log('deleted...')
+                            isDelete = true
                             p.isOnRoom = false
-                            let newMaster = undefined
-                            if (p.isRoomMaster) {
-                                p.isRoomMaster = false
-                                const otherP = room.players.find(
-                                    (p) => p.isOnRoom && p.player.toString() !== idPlayer,
-                                )
-
-                                if (otherP) {
-                                    otherP.isRoomMaster = true
-                                    newMaster = otherP.player
-                                }
-                            }
                             console.log('emit ', room._id.toString())
                             io.sockets.sockets
                                 .get(player.socketId)
                                 .to(room._id.toString())
                                 .emit('rooms/players/remove/res', {
                                     data: new RoomPlayerRemoveRes({
-                                        player: idPlayer,
+                                        player: _id,
                                         position: p.position,
-                                        newMaster,
                                     }),
                                 })
                         }
+                    })
+                    if (isDelete) {
+                        io.sockets.sockets.get(player.socketId).leave(room._id.toString())
+                        io.sockets.sockets.get(player.socketId).handshake.idRoom = undefined
+                        // console.log(room)
+                        await RoomModel.updateOne({ _id: room._id }, room)
+                        io.emit('rooms', { type: 'update', data: new RoomAddRes(room) })
                     }
-                })
-                if (isDelete) {
-                    io.sockets.sockets.get(player.socketId).leave(room._id.toString())
-                    io.sockets.sockets.get(player.socketId).handshake.idRoom = undefined
-                    // console.log(room)
-                    await RoomModel.updateOne({ _id: room._id }, room)
-                    io.emit('rooms', { type: 'update', data: new RoomAddRes(room) })
                 }
             }
             // console.log(rooms[rooms.length - 1])
