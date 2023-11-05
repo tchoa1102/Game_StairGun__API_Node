@@ -1,6 +1,10 @@
 const { default: mongoose } = require('mongoose')
 const cardController = require('../../../app/controllers/card.controller')
-const { MessageModel } = require('../../../app/models')
+const { MessageModel, UserModel, RoomModel } = require('../../../app/models')
+
+function createTypeMessage(typeMessage, id) {
+    return typeMessage[id] || 'private'
+}
 
 class Chat {
     constructor(socket, io) {
@@ -11,40 +15,54 @@ class Chat {
         console.log('socket: ', this.socket.handshake.idPlayer)
         this.typeMessage = {
             '': 'public',
-            room: 'room',
         }
     }
 
     // on: chat/send | emit: chat/receiving
-    async sendMessage({ receiverId, message }, callback) {
+    async sendMessage({ receiverId, message }, callback) { // receiverId = '' | [id]
         if (message.trim().length === 0) return
         try {
+            // type: public | room | private
+            const idRoom = this.socket.handshake.idRoom
+            this.typeMessage[idRoom] = 'room'
             const type = createTypeMessage(this.typeMessage, receiverId)
             const value = message.trim()
             const from = new mongoose.Types.ObjectId(this._id)
             const objMessage = { type, value, from }
-            if (receiverId === this.typeMessage.room) objMessage.to = this.socket.handshake.idRoom
-            else objMessage.to = receiverId
+            let receiverSocketId = ''
+            // to room
+            if (type === this.typeMessage[idRoom]) {
+                objMessage.to = idRoom
+                receiverSocketId = idRoom
+            }
+            // to player
+            if (type !== this.typeMessage[idRoom] && type !== this.typeMessage['']) {
+                objMessage.to = receiverId
+                const targetPlayer = await UserModel.findById(receiverId).lean()
+                console.log(targetPlayer.socketId)
+                receiverSocketId = targetPlayer.socketId
+            }
+            // default: to public
             const newMessage = new MessageModel(objMessage)
 
             // await newMessage.save()
-            // console.log({ receiverId, message }, newMessage)
 
-            if (!receiverId) {
-                return this.io.emit('chat/receiving', {
+            const resMessage = {
                     sender: { _id: this._id, name: this.name },
                     receiver: { _id: receiverId },
                     message: newMessage.value,
-                })
+                }
+            console.log('receivedId: ', receiverId, ', Type: ', type, objMessage)
+            if (type !== this.typeMessage[idRoom] && type !== this.typeMessage['']) {
+                // if send to player
+                console.log('send to player, receiverSocketId: ', receiverSocketId)
+                this.socket.emit('chat/receiving', resMessage)
             }
-            if (receiverId === 'room') {
-                receiverId = this.socket.handshake.idRoom
-            }
-            return this.io.to(receiverId).emit('chat/receiving', {
-                sender: { _id: this._id, name: this.name },
-                receiver: { _id: receiverId },
-                message: newMessage.value,
-            })
+            // send to public
+            if (type === this.typeMessage['']) return this.io.emit('chat/receiving', resMessage)
+            // send to room | receiver
+            console.log('send other player')
+            return this.io.to(receiverSocketId).emit('chat/receiving', resMessage)
         } catch (error) {
             console.log(error)
             callback({
@@ -53,6 +71,7 @@ class Chat {
         }
     }
 
+/*
     // testMessage(data) {
     //     console.log(data)
     //     cardController
@@ -462,11 +481,7 @@ class Chat {
     //             console.log('result: ', result)
     //         })
     //         .catch((error) => console.log(error))
-    // }
-}
-
-function createTypeMessage(typeMessage, id) {
-    return typeMessage[id] || 'private'
+    // }*/
 }
 
 module.exports = Chat

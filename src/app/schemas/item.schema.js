@@ -3,14 +3,19 @@ const Schema = mongoose.Schema
 const ObjectId = Schema.ObjectId
 const newObjectId = mongoose.Types.ObjectId
 
+class Item {
+    constructor(data, isWear, levelUp) {
+        this.data = data || new newObjectId('000000000000000000000000')
+        this.isWear = isWear || false
+        this.levelUp = levelUp || 0
+    }
+}
+
 const itemSchema = new Schema({
-    from: {
-        type: String,
-        required: true,
-    },
     data: {
         type: ObjectId,
         default: new newObjectId('000000000000000000000000'),
+        ref: 'items'
     },
     isWear: {
         type: Boolean,
@@ -22,4 +27,7 @@ const itemSchema = new Schema({
     },
 })
 
-module.exports = itemSchema
+module.exports = {
+    itemSchema,
+    Item
+}

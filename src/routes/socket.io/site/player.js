@@ -14,16 +14,16 @@ class player {
         try {
             const findFriend = await FriendModel.findOne({
                 $and: [
-                    { $or: [{ friend1: targetId }, { friend2: this.socket.handshake.idPlayer }] },
-                    { $or: [{ friend1: this.socket.handshake.idPlayer }, { friend2: targetId }] },
+                    { $or: [{ player1: targetId }, { player2: this.socket.handshake.idPlayer }] },
+                    { $or: [{ player1: this.socket.handshake.idPlayer }, { player2: targetId }] },
                 ],
             }).lean()
 
-            if (findFriend) return this.socket.emit('res/error', { status: 404 })
+            if (findFriend.length > 0) return this.socket.emit('res/error', { status: 404, message: 'Các bạn đã là bạn!' })
             const newFriend = await UserModel.findById(targetId)
             const findUser = await UserModel.findById(this.id).lean()
             if (!newFriend) return this.socket.emit('res/error', { status: 404 })
-            console.log('New friend: ', newFriend)
+            // console.log('New friend: ', newFriend)
             this.socket.to(newFriend.socketId).emit('player/friends/add/check', {
                 _id: this.id,
                 name: findUser.name,
@@ -38,16 +38,17 @@ class player {
     // on: player/friends/add/res-add | emit: player/friends/add/res-add/success
     async saveFriend({ _id, isAccepted }) {
         try {
+            const userWantAddFriend = await UserModel.findById(_id).lean()
             if (!isAccepted)
                 return this.io
                     .to(userWantAddFriend.socketId)
                     .emit('res/error', { status: '300', message: 'Kết bạn thất bại!' })
-            const userWantAddFriend = await UserModel.findById(_id).lean()
             const userAddedFriend = await UserModel.findById(this.id).lean()
             if (!userWantAddFriend || !userAddedFriend)
                 return this.socket.emit('res/error', { status: 404 })
-            const friend = new FriendModel({ friend1: _id, friend2: this.id })
-            console.log(friend)
+            const friend = new FriendModel({ player1: _id, player2: this.id })
+            // console.log('Id friend', _id, this.id)
+            // console.log(friend)
             await friend.save()
 
             this.io.to(userWantAddFriend.socketId).emit('player/friends/add/res-add/success', {

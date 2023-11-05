@@ -41,7 +41,7 @@ class match {
 
                 console.log('idMatch: ', idMatch, '; idRoom: ', idRoom, 'result update: ', result)
 
-                socket.handshake.match = dataMatch
+                // socket.handshake.match = dataMatch
 
                 const allPlayerLoaded = playersOnMatch.every((player) => {
                     if (player.target.toString() === idPlayer) return true

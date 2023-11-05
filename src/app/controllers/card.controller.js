@@ -18,7 +18,7 @@ class CardController {
         while (cards.length < config.maxCard) {
             // find unique stair
             let i = Math.floor(Math.random() * stairs.length)
-            console.log(i)
+            // console.log(i)
             while (stairsPassed.find((j) => j === i) !== undefined) {
                 i = Math.floor(Math.random() * stairs.length)
             }

@@ -73,6 +73,8 @@ class Stick {
     left({ event }) {
         this.setId(this.getId())
         // console.log(this.getId())
+        console.log('Left')
+        console.log('Data match: ', this.socket.handshake.match)
         const location = this.socket.handshake.match.player.stairGame
 
         const mainShape = createShapeStick(

@@ -4,4 +4,5 @@ module.exports = {
     AuthController: require('./auth.controller'),
     RoomController: require('./room.controller'),
     CardController: require('./card.controller'),
+    ItemController: require('./item.controller')
 }

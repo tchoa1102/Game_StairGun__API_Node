@@ -87,7 +87,7 @@ class room {
                     }
                 })
 
-                console.log(room.players)
+                // console.log(room.players)
 
                 await RoomModel.updateOne({ _id: room._id }, room)
                 if (teamA.length !== teamB.length) {
@@ -124,7 +124,7 @@ class room {
                     const maps = await MapModel.find()
                     const mapChosenIndex = Math.floor(Math.random() * maps.length)
                     const map = await maps[mapChosenIndex].populate('objects.data')
-                    console.log('\n\nMap: ', map)
+                    // console.log('\n\nMap: ', map)
                     const configCircleStick = characters[0].srcConfig
 
                     const timeStart = new Date().toISOString()
@@ -178,7 +178,7 @@ class room {
                                 },
                             }
 
-                            const pl = PlayerOnMatchModel(player)
+                            const pl = new PlayerOnMatchModel(player)
                             await pl.save()
                             players.push(player)
                         }
@@ -188,7 +188,6 @@ class room {
                         const data = {
                             match: newMatch._id,
                             map: map._id,
-                            curTiled: '',
 
                             stairs: listStair,
                             cards: cardsData.cardsDetail,
@@ -199,10 +198,11 @@ class room {
                             endEventTime: Math.abs(new Date() - new Date(0)),
                         }
                         io.sockets.sockets.get(player.target.socketId).handshake.match = data
+                        console.log('data day: ', socket.handshake.match.player)
                     })
 
                     await newMatch.save()
-                    console.log('Create match: ', newMatch)
+                    // console.log('Create match: ', newMatch)
 
                     const dataMatchRes = {
                         ...newMatch.toObject(),
@@ -219,7 +219,7 @@ class room {
                         map.objects,
                         map.backgroundGunGame,
                     )
-                    console.log(dataRes)
+                    // console.log(dataRes)
                     return io.to(idRoom).emit('matches/create/res', {
                         data: dataRes,
                     })
