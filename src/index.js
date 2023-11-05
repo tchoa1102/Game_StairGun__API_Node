@@ -14,7 +14,7 @@ if (fs.existsSync(keyPath)) {
 }
 
 const config = require('./config/server')
-const router = require('./routes')
+const router = require('./routes/http-https')
 const routerSocketIO = require('./routes/socket.io')
 const db = require('./config/db')
 const { createServer } = require('http')

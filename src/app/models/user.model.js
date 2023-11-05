@@ -46,11 +46,6 @@ const UserModel = new Schema(
                 default:
                     '',
             },
-            hand: {
-                type: String,
-                default:
-                    '',
-            },
             foot: {
                 type: String,
                 default:

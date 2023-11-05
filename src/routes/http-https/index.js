@@ -3,8 +3,8 @@ const match = require('./match')
 const room = require('./room.router')
 const card = require('./card.route')
 const item = require('./item.route')
-const middlewares = require('../middlewares')
-const { AuthController } = require('../app/controllers')
+const middlewares = require('../../middlewares')
+const { AuthController } = require('../../app/controllers')
 
 function routes(app) {
     // app.use
