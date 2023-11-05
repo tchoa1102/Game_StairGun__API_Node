@@ -3,7 +3,7 @@ const chat = require('./chat')
 const stick = require('./stick')
 const room = require('./site/room')
 const { RoomModel, UserModel } = require('../../app/models')
-const RoomAddRes = require('./site/room.add.res')
+const RoomAddRes = require('./site/room/room.add.res')
 
 const config = require('../../gameConfig.json')
 
