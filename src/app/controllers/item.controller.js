@@ -32,7 +32,10 @@ class ItemController {
 
 			await UserModel.updateOne({ _id: user._id }, { gold: user.gold, bag: user.bag })
 			itemNew.data = item
-			return res.json({ data: itemNew })
+			return res.json({ data: {
+				item: itemNew,
+				user: {gold},
+			} })
 		} catch(e) {
 			return next(e)
 		}
