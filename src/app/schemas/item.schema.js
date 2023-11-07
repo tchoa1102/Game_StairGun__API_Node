@@ -5,6 +5,7 @@ const newObjectId = mongoose.Types.ObjectId
 
 class Item {
     constructor(data, isWear, levelUp) {
+        this._id = new newObjectId()
         this.data = data || new newObjectId('000000000000000000000000')
         this.isWear = isWear || false
         this.levelUp = levelUp || 0
