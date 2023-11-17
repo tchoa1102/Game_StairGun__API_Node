@@ -23,6 +23,10 @@
         "h": 147,
         "scale": 0.5
     },
+    "person": {
+        "width": 90,
+        "height": 50
+    },
     "colors": {
         "require": "\\x1b",
         "reset": "[0m",

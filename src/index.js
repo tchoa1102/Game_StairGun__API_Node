@@ -30,7 +30,7 @@ const optionCORS = {
 const app = express()
 const server = createServer(app)
 const io = new Server(server, {
-    cors: optionCORS,
+    cors: optionCORS
 })
 
 // middleware

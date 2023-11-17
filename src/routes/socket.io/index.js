@@ -1,6 +1,7 @@
 const site = require('./site')
 const chat = require('./chat')
 const stick = require('./stick')
+const gunGame = require('./gun.game/index')
 const room = require('./site/room')
 const { RoomModel, UserModel } = require('../../app/models')
 const RoomAddRes = require('./site/room/room.add.res')
@@ -9,135 +10,318 @@ const config = require('../../gameConfig.json')
 
 const playersOnMatch = [
     {
-        match: '6528fb7d960eecd821e4040d',
-        target: {
-            _id: '103339144746729860355111',
-            AGI: '5',
-            ATK: '10',
-            DEF: '5',
-            HP: '100',
-            LUK: '5',
-            STA: '100',
-            bag: [],
-            character: '000000000000000000000000',
-            clientId: 'WuT8z1I5u_IDnHzGAAAA',
-            email: 'chihoa1593@gmail.com',
-            level: 1,
-            looks: {
-                face: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/face/face.default.json',
-                body: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/body/body.default.json',
-                hand: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1…tairGunGame/equipment/body/body.default.hand.json',
-                foot: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/foot/foot.default.json',
-            },
-            name: 'Kyuseishu Shu',
-            picture:
-                'https://lh3.googleusercontent.com/a/ACg8ocIHww5amL1M1RYEUP_UzHlX35DUZH2spv8znVITPOqB7w=s96-c',
-            skills: [],
-            socketId: 'fHQpRKS5mw4xRyMZAAAB',
-            uid: 'FaBAeAH0GsQq0J83tjMZMwKTqbF2',
-            updatedAt: '2023-10-20T06:14:18.752Z',
-        },
-        position: 0,
-        mainGame: {
-            x: 10,
-            y: 10,
-            characterGradient: '0',
-            hp: '100',
-            sta: '100',
-            atk: '10',
-            def: '5',
-            luk: '5',
-            agi: '5',
-            skillsUsing: [],
-            cardsUsing: [],
-            gunAngel: '0',
-            gunZone: {
-                begin: '0',
-                end: '90',
-            },
-            stateEffects: [],
-        },
-        stairGame: { x: 434.6562286730177, y: config.stairGame.height },
+        _id: '103339144746729860355111',
+        AGI: 5,
+        ATK: 5,
+        DEF: 5,
+        HP: 100,
+        LUK: 5,
+        STA: 100,
+        clientId: 'WuT8z1I5u_IDnHzGAAAA',
+        level: 1,
+        name: 'Kyuseishu Shu',
+        picture:
+            'https://lh3.googleusercontent.com/a/ACg8ocIHww5amL1M1RYEUP_UzHlX35DUZH2spv8znVITPOqB7w=s96-c',
+        skills: [],
+        socketId: 'fHQpRKS5mw4xRyMZAAAB',
+        uid: 'FaBAeAH0GsQq0J83tjMZMwKTqbF2',
+        updatedAt: '2023-10-20T06:14:18.752Z',
     },
     {
-        match: '6528fb7d960eecd821e4040d',
-        target: {
-            _id: '115421543287322673156111',
-            AGI: '5',
-            ATK: '10',
-            DEF: '5',
-            HP: '100',
-            LUK: '5',
-            STA: '100',
-            bag: [],
-            character: '000000000000000000000000',
-            clientId: 'WuT8z1I5u_IDnHzGAAAA',
-            email: 'chihoa1593@gmail.com',
-            level: 1,
-            looks: {
-                face: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/face/face.default.json',
-                body: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/body/body.default.json',
-                hand: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1…tairGunGame/equipment/body/body.default.hand.json',
-                foot: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/foot/foot.default.json',
-            },
-            name: 'Kyuseishu Shu',
-            picture:
-                'https://lh3.googleusercontent.com/a/ACg8ocIHww5amL1M1RYEUP_UzHlX35DUZH2spv8znVITPOqB7w=s96-c',
-            skills: [],
-            socketId: 'fHQpRKS5mw4xRyMZAAAB',
-            uid: 'FaBAeAH0GsQq0J83tjMZMwKTqbF2',
-            updatedAt: '2023-10-20T06:14:18.752Z',
+        _id: '115421543287322673156111',
+        AGI: 5,
+        ATK: 5,
+        DEF: 5,
+        HP: 100,
+        LUK: 5,
+        STA: 100,
+        bag: [],
+        character: '000000000000000000000000',
+        clientId: 'WuT8z1I5u_IDnHzGAAAA',
+        email: 'chihoa1593@gmail.com',
+        level: 1,
+        looks: {
+            face: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/face/face.default.json',
+            body: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/body/body.default.json',
+            hand: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1…tairGunGame/equipment/body/body.default.hand.json',
+            foot: 'https://res.cloudinary.com/dyhfvkzag/raw/upload/v1/StairGunGame/equipment/foot/foot.default.json',
         },
-        position: 3,
-        mainGame: {
-            x: 10,
-            y: 10,
-            characterGradient: '0',
-            hp: '100',
-            sta: '100',
-            atk: '10',
-            def: '5',
-            luk: '5',
-            agi: '5',
-            skillsUsing: [],
-            cardsUsing: [],
-            gunAngel: '0',
-            gunZone: {
-                begin: '0',
-                end: '90',
-            },
-            stateEffects: [],
-        },
-        stairGame: { x: 307.3022282869877, y: config.stairGame.height - 1000, vx: 0, vy: 0 },
+        name: 'Kyuseishu Shu',
+        picture:
+            'https://lh3.googleusercontent.com/a/ACg8ocIHww5amL1M1RYEUP_UzHlX35DUZH2spv8znVITPOqB7w=s96-c',
+        skills: [],
+        socketId: 'fHQpRKS5mw4xRyMZAAAB',
+        uid: 'FaBAeAH0GsQq0J83tjMZMwKTqbF2',
+        updatedAt: '2023-10-20T06:14:18.752Z',
     },
 ]
 
 const playerData = {
     match: '6528fb7d960eecd821e4040d',
-    target: '115421543287322673156111',
+    target: { _id: '115421543287322673156111' },
     position: 3,
     mainGame: {
-        x: 10,
-        y: 10,
-        characterGradient: '0',
-        hp: '100',
-        sta: '100',
-        atk: '10',
-        def: '5',
-        luk: '5',
-        agi: '5',
+        bottomLeft: { x: 190.5, y: -400 },
+        characterGradient: 90,
+        AGI: 5,
+        ATK: 5,
+        DEF: 5,
+        HP: 100,
+        LUK: 5,
+        STA: 100,
         skillsUsing: [],
         cardsUsing: [],
-        gunAngel: '0',
-        gunZone: {
-            begin: '0',
-            end: '90',
-        },
         stateEffects: [],
     },
     stairGame: { x: 307.3022282869877, y: config.stairGame.height - 1000, vx: 0, vy: 0 },
 }
 
+const playerData2 = 
+    {
+        match: '6528fb7d960eecd821e4040d',
+        target: {
+            _id: '103339144746729860355111',
+            AGI: 5,
+            ATK: 5,
+            DEF: 5,
+            HP: 100,
+            LUK: 5,
+            STA: 100,
+        },
+        position: 0,
+        mainGame: {
+            bottomLeft: { x: 600, y: -340 },
+            characterGradient: 90,
+            AGI: 5,
+            ATK: 5,
+            DEF: 5,
+            HP: 100,
+            LUK: 5,
+            STA: 100,
+            skillsUsing: [],
+            cardsUsing: [],
+            stateEffects: [],
+        },
+        stairGame: { x: 434.6562286730177, y: config.stairGame.height },
+    }
+
+// #region config card and stair
+const objects = [
+        {
+            location: {
+                x: 100,
+                y: -400,
+            },
+            data: {
+                _id: '653938778921bd559f21975f',
+                points: [
+                    {
+                        x: 0,
+                        y: 54.5,
+                    },
+                    {
+                        x: 45,
+                        y: 22,
+                    },
+                    {
+                        x: 90.5,
+                        y: 0,
+                    },
+                    {
+                        x: 152.5,
+                        y: 0,
+                    },
+                    {
+                        x: 199.5,
+                        y: 15,
+                    },
+                    {
+                        x: 185.5,
+                        y: 97.5,
+                    },
+                    {
+                        x: 134.5,
+                        y: 140,
+                    },
+                    {
+                        x: 9.5,
+                        y: 140,
+                    },
+                ],
+                canBeDestroyed: false,
+                src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/gunGame/objects/stone-1.png',
+                name: 'stone-1',
+            },
+        },
+        {
+            location: {
+                x: 600,
+                y: -340,
+            },
+            data: {
+                _id: '65393b588921bd559f219760',
+                points: [
+                    {
+                        x: 0,
+                        y: 8.36,
+                    },
+                    {
+                        x: 26.28,
+                        y: 0,
+                    },
+                    {
+                        x: 60.77,
+                        y: 0,
+                    },
+                    {
+                        x: 86.09,
+                        y: 12.06,
+                    },
+                    {
+                        x: 111.13,
+                        y: 30.36,
+                    },
+                    {
+                        x: 105.84,
+                        y: 78,
+                    },
+                    {
+                        x: 36.29,
+                        y: 78,
+                    },
+                    {
+                        x: 7.92,
+                        y: 54.32,
+                    },
+                ],
+                canBeDestroyed: false,
+                src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/gunGame/objects/stone-2.png',
+                name: 'stone-2',
+            },
+        },
+        {
+            location: {
+                x: 120,
+                y: -380,
+            },
+            data: {
+                _id: '65386e998921bd559f21975e',
+                points: [
+                    {
+                        x: 0,
+                        y: 11.94,
+                    },
+                    {
+                        x: 8.49,
+                        y: 9.52,
+                    },
+                    {
+                        x: 9.93,
+                        y: 6.13,
+                    },
+                    {
+                        x: 11.53,
+                        y: 5.32,
+                    },
+                    {
+                        x: 12.97,
+                        y: 5.16,
+                    },
+                    {
+                        x: 12.05,
+                        y: 3.06,
+                    },
+                    {
+                        x: 13.45,
+                        y: 1.13,
+                    },
+                    {
+                        x: 21.94,
+                        y: 1.13,
+                    },
+                    {
+                        x: 22.74,
+                        y: 0,
+                    },
+                    {
+                        x: 27.54,
+                        y: 0.65,
+                    },
+                    {
+                        x: 28.98,
+                        y: 2.1,
+                    },
+                    {
+                        x: 29.3,
+                        y: 0.32,
+                    },
+                    {
+                        x: 30.91,
+                        y: 0.1,
+                    },
+                    {
+                        x: 32.67,
+                        y: 0,
+                    },
+                    {
+                        x: 32.99,
+                        y: 0.05,
+                    },
+                    {
+                        x: 32.83,
+                        y: 3.23,
+                    },
+                    {
+                        x: 34.91,
+                        y: 3.55,
+                    },
+                    {
+                        x: 36.67,
+                        y: 4.35,
+                    },
+                    {
+                        x: 37.95,
+                        y: 5.89,
+                    },
+                    {
+                        x: 39.23,
+                        y: 7.42,
+                    },
+                    {
+                        x: 40.03,
+                        y: 9.52,
+                    },
+                    {
+                        x: 49,
+                        y: 10.48,
+                    },
+                    {
+                        x: 48.2,
+                        y: 40.97,
+                    },
+                    {
+                        x: 29.14,
+                        y: 50,
+                    },
+                    {
+                        x: 1.44,
+                        y: 43.55,
+                    },
+                    {
+                        x: 1.44,
+                        y: 21.94,
+                    },
+                    {
+                        x: 0,
+                        y: 21.94,
+                    },
+                ],
+                canBeDestroyed: true,
+                src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1698299614/StairGunGame/gunGame/objects/box-size-49x50.png',
+                name: 'gift-box',
+            },
+        },
+    ]
 const cards = [
     {
         timeOut: null,
@@ -1143,6 +1327,7 @@ const stairs = [
                     _id: '6528fb7d960eecd821e4040a',
                 },
             ]
+// #endregion config card and stair
 
 module.exports = function (io) {
     io.on('connection', async function (socket) {
@@ -1150,25 +1335,21 @@ module.exports = function (io) {
         // console.log(socket)
 
         // #region test env => can xoa
-        // socket.handshake.idRoom = '1'
-        // socket.join(socket.handshake.idRoom)
-        // socket.handshake.match = {
-            // stairs: stairs,
-        //     cards: cards,
-        //     timeStart: '2023-10-13T08:10:37.875Z',
-        //     players: playersOnMatch.reduce((result, player) => {
-        //         result[player.target._id.toString()] = {}
-        //         result[player.target._id.toString()] = player.target
-
-        //         return result
-        //     }, {}),
-        //     player: playerData,
-        //     eventStateSpecial: undefined,
-        //     endEventTime: Math.abs(new Date() - new Date(0)),
-        // }
+        socket.handshake.idRoom = '1'
+        socket.join(socket.handshake.idRoom)
+        socket.handshake.match = {
+            stairs: stairs,
+            cards: cards,
+            timeStart: '2023-10-13T08:10:37.875Z',
+            players: playersOnMatch,
+            player: playerData,
+            objects,
+            eventStateSpecial: undefined,
+            endEventTime: Math.abs(new Date() - new Date(0)),
+        }
         // #endregion test env => can xoa
 
-        console.log('idPlayer: ', socket.handshake.idPlayer, socket.handshake.match)
+        console.log('idPlayer: ', socket.handshake.idPlayer)
         const dataSendWhenConnection = { clientId: socket.client.id, socketId: socket.id }
         try {
             await UserModel.updateOne(
@@ -1208,6 +1389,7 @@ module.exports = function (io) {
         site(socket, io)
         chat(socket, io)
         stick(socket, io)
+        gunGame(socket, io)
     })
 }
 

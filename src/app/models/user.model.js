@@ -51,6 +51,7 @@ const UserModel = new Schema(
                 default:
                     '',
             },
+            weapon: { type: String, default: '' },
         },
         bag: [itemSchema],
     },

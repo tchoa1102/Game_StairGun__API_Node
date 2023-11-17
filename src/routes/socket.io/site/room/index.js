@@ -150,22 +150,16 @@ class room {
                                 target: dataPlayer,
                                 position: p.position,
                                 mainGame: {
-                                    x: 10,
-                                    y: 10,
-                                    characterGradient: '0',
-                                    hp: dataPlayer.HP,
-                                    sta: dataPlayer.STA,
-                                    atk: dataPlayer.ATK,
-                                    def: dataPlayer.DEF,
-                                    luk: dataPlayer.LUK,
-                                    agi: dataPlayer.AGI,
+                                    bottomLeft: { x: 100, y: 400 },
+                                    characterAngle: 90,
+                                    HP: Number.parseFloat(dataPlayer.HP),
+                                    STA: Number.parseFloat(dataPlayer.STA),
+                                    ATK: Number.parseFloat(dataPlayer.ATK),
+                                    DEF: Number.parseFloat(dataPlayer.DEF),
+                                    LUK: Number.parseFloat(dataPlayer.LUK),
+                                    AGI: Number.parseFloat(dataPlayer.AGI),
                                     skillsUsing: [],
                                     cardsUsing: [],
-                                    gunAngel: '0',
-                                    gunZone: {
-                                        begin: '0',
-                                        end: '90',
-                                    },
                                     stateEffects: [],
                                 },
                                 stairGame: {
@@ -185,7 +179,7 @@ class room {
                     }
                     // #endregion convert players
                     players.forEach((player) => {
-                        const data = {
+                        const dataSaveSocket = {
                             match: newMatch._id,
                             map: map._id,
 
@@ -194,10 +188,11 @@ class room {
                             timeStart: timeStart,
                             players: players.map((p) => p.target),
                             player,
+                            objects: map.objects,
                             eventState: undefined,
                             endEventTime: Math.abs(new Date() - new Date(0)),
                         }
-                        io.sockets.sockets.get(player.target.socketId).handshake.match = data
+                        io.sockets.sockets.get(player.target.socketId).handshake.match = dataSaveSocket
                         console.log('data day: ', socket.handshake.match.player)
                     })
 

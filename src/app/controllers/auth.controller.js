@@ -32,7 +32,7 @@ class AuthController {
             }
         })
         user.friends = friendEdited
-        console.log('player loaded: ', user)
+        // console.log('player loaded: ', user)
         return res.json(user)
     }
 }

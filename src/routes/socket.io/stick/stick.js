@@ -64,7 +64,7 @@ class Stick {
         }
 
         // console.log(mainShape, nearest)
-        console.log('stand: ', location)
+        // console.log('stand: ', location)
         this.io
             .to(this.socket.handshake.idRoom)
             .emit(this.EVENT, new StickEventRes(this._id, event, location.x, location.y))
@@ -73,8 +73,8 @@ class Stick {
     left({ event }) {
         this.setId(this.getId())
         // console.log(this.getId())
-        console.log('Left')
-        console.log('Data match: ', this.socket.handshake.match)
+        // console.log('Left')
+        // console.log('Data match: ', this.socket.handshake.match)
         const location = this.socket.handshake.match.player.stairGame
 
         const mainShape = createShapeStick(
@@ -211,7 +211,7 @@ class Stick {
         // #endregion check stick free fall
 
         // console.log(mainShape, nearest)
-        console.log('left: ', location)
+        // console.log('left: ', location)
         const specialEvent = this.socket.handshake.match.eventStateSpecial
         this.io
             .to(this.socket.handshake.idRoom)
@@ -356,7 +356,7 @@ class Stick {
         // #endregion check stick free fall
 
         // console.log(mainShape, nearest)
-        console.log('right: ', location)
+        // console.log('right: ', location)
 
         const specialEvent = this.socket.handshake.match.eventStateSpecial
         this.io
@@ -374,7 +374,7 @@ class Stick {
         location.vx = -4
         location.vy = -10
         this.updateLocation(location)
-        console.log('jump-left: ', location)
+        // console.log('jump-left: ', location)
         this.io
             .to(this.socket.handshake.idRoom)
             .emit(this.EVENT, new StickEventRes(this._id, event, location.x, location.y))
@@ -386,7 +386,7 @@ class Stick {
         location.vx = 4
         location.vy = -10
         this.updateLocation(location)
-        console.log('jump-right: ', location)
+        // console.log('jump-right: ', location)
         this.io
             .to(this.socket.handshake.idRoom)
             .emit(this.EVENT, new StickEventRes(this._id, event, location.x, location.y))
@@ -394,7 +394,7 @@ class Stick {
 }
 
 function timeOutUpdateCard([_id, card]) {
-    console.log('Arguments: ', card._id)
+    // console.log('Arguments: ', card._id)
     let cardFound = null
     const numOfCardsPickUp = this.socket.handshake.match.cards.reduce((total, curCard) => {
         // console.log(card.owner, _id, card.isEnable)
