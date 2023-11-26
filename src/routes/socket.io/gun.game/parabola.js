@@ -27,7 +27,7 @@ class Parabola {
     }
 
     intersectionWithStraightLine(line) {
-        const l = createVariableLine(line.first, line.last)
+        const l = line.createVariable()
         const equationL2 = new Parabola().copy(this).sumLine(l)
         const xIntersection = MathHelper.solveEquationLevel2(equationL2)
         if (!xIntersection) return null

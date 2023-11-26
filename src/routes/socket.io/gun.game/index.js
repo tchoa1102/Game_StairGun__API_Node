@@ -14,7 +14,7 @@ const Bullet = require('./bullet')
 
 module.exports = function (socket, io) {
     const gunGame = new GunGame(socket, io)
-    gunGame.gun({ angle: 45, velocity_0: 34 })
+    gunGame.gun({ angle: 45, velocity_0: 26 })
 
     socket.on('gun-game/to-left', (data) => gunGame.toLeft(data))
     socket.on('gun-game/to-right', (data) => gunGame.toRight(data))
