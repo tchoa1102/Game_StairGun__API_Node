@@ -83,15 +83,10 @@ class GunGame {
                 // console.log('Distance can increase: ', distanceCanIncrease)
                 dataPOnMainGame.bottomLeft.x -= distanceCanIncrease
                 // dataPOnMainGame.bottomLeft.x -= 1
-                dataPOnMainGame.bottomLeft.y = -findYFromXInStraightLine(
+                dataPOnMainGame.bottomLeft.y = -followLine.line.findYFromX(
                     dataPOnMainGame.bottomLeft.x,
-                    followLine.line.first,
-                    followLine.line.last,
                 )
-                dataPOnMainGame.characterGradient = calculateAngle(
-                    followLine.line.first,
-                    followLine.line.last,
-                )
+                dataPOnMainGame.characterGradient = followLine.line.calcAngle()
             }
             console.log('new location: ', dataPOnMainGame.bottomLeft, '\n---------\n')
             // #endregion update location
@@ -166,15 +161,10 @@ class GunGame {
                 // console.log('Distance can increase: ', distanceCanIncrease)
                 dataPOnMainGame.bottomLeft.x += distanceCanIncrease
                 // dataPOnMainGame.bottomLeft.x -= 1
-                dataPOnMainGame.bottomLeft.y = -findYFromXInStraightLine(
+                dataPOnMainGame.bottomLeft.y = -followLine.line.findYFromX(
                     dataPOnMainGame.bottomLeft.x,
-                    followLine.line.first,
-                    followLine.line.last,
                 )
-                dataPOnMainGame.characterGradient = calculateAngle(
-                    followLine.line.first,
-                    followLine.line.last,
-                )
+                dataPOnMainGame.characterGradient = followLine.line.calcAngle()
             }
             console.log('new location: ', dataPOnMainGame.bottomLeft, '\n---------\n')
             // #endregion update location

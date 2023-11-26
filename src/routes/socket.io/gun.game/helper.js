@@ -30,12 +30,12 @@ function getEquationBullet({ angle, v0, forceWind }) {
 }
 
 function nearestNeighborPolygon(main_shape, polygons) {
-    const m_left_f = main_shape[3]
-    const m_left_l = main_shape[2]
-    const m_right_f = main_shape[0]
-    const m_right_l = main_shape[1]
-    const m_bottom_f = main_shape[1]
-    const m_bottom_l = main_shape[2]
+    const m_left_f = new Point().copy(main_shape[3])
+    const m_left_l = new Point().copy(main_shape[2])
+    const m_right_f = new Point().copy(main_shape[0])
+    const m_right_l = new Point().copy(main_shape[1])
+    const m_bottom_f = m_right_l
+    const m_bottom_l = m_left_l
 
     const topLine = new Line().init(m_left_f, m_right_f)
     const rightLine = new Line().init(m_right_f, m_right_l)
@@ -111,14 +111,15 @@ function nearestNeighborPolygon(main_shape, polygons) {
     function bottomNearest(f_edge, l_edge) {
         const axis = 'y'
         const commonAxis = axis === 'y' ? 'x' : 'y'
-        const inside = checkInside(m_bottom_f, m_bottom_l, f_edge, l_edge, commonAxis)
+        const tarLine = new Line().init(f_edge, l_edge)
+        const inside = tarLine.isInside(botLine, commonAxis)
         // console.log('Inside: ', inside)
         if (!inside) return
-        const distanceF = calcDistancePoint_PointOnLineCommonAxis(m_bottom_f, f_edge, l_edge, axis)
-        const distanceL = calcDistancePoint_PointOnLineCommonAxis(m_bottom_l, f_edge, l_edge, axis)
+        const distanceF = tarLine.calcDistanceTwoPointOnLineCommonAxis(m_bottom_f, axis)
+        const distanceL = tarLine.calcDistanceTwoPointOnLineCommonAxis(m_bottom_l, axis)
 
         // f_edge o ------------ I o --------- l_edge, I = (Math.min(f_edge.x))
-        const intersectionPoint = calcIntersectionPoint(m_bottom_f, m_bottom_l, f_edge, l_edge)
+        const intersectionPoint = tarLine.calcIntersectionPoint(botLine)
         // intersectionPoint && console.log('point: ', f_edge, l_edge)
         if (
             intersectionPoint &&
@@ -127,19 +128,13 @@ function nearestNeighborPolygon(main_shape, polygons) {
         )
             max(res.bottom.follow, 0, true)
         else {
-            const e_f = new Point(
-                f_edge.x,
-                findYFromXInStraightLine(f_edge.x, m_bottom_f, m_bottom_l),
-            )
+            const e_f = new Point(f_edge.x, botLine.findYFromX(f_edge.x))
             const midX = Math.abs(f_edge.x + l_edge.x) / 2
-            const e_mid_f = new Point(midX, findYFromXInStraightLine(midX, m_bottom_f, m_bottom_l))
-            const e_l = new Point(
-                l_edge.x,
-                findYFromXInStraightLine(l_edge.x, m_bottom_f, m_bottom_l),
-            )
-            const d_e_f = calcDistancePoint_PointOnLineCommonAxis(e_f, f_edge, l_edge, axis)
-            const d_e_mid_f = calcDistancePoint_PointOnLineCommonAxis(e_mid_f, f_edge, l_edge, axis)
-            const d_e_l = calcDistancePoint_PointOnLineCommonAxis(e_l, f_edge, l_edge, axis)
+            const e_mid_f = new Point(midX, botLine.findYFromX(midX))
+            const e_l = new Point(l_edge.x, botLine.findYFromX(l_edge.x))
+            const d_e_f = tarLine.calcDistanceTwoPointOnLineCommonAxis(e_f, axis)
+            const d_e_mid_f = tarLine.calcDistanceTwoPointOnLineCommonAxis(e_mid_f, axis)
+            const d_e_l = tarLine.calcDistanceTwoPointOnLineCommonAxis(e_l, axis)
             const d = Math.max(convert(d_e_f), convert(d_e_mid_f), convert(d_e_l))
             max(res.bottom.follow, d)
         }
@@ -178,17 +173,12 @@ function nearestNeighborPolygon(main_shape, polygons) {
         let topDistance = Infinity
         let botDistance = Infinity
         let midDistance = Infinity
-        const intersection_top_and_tar = calcIntersectionPoint(
-            topLine.first,
-            topLine.last,
-            f_edge,
-            l_edge,
-        )
+        const tarLine = new Line().init(f_edge, l_edge)
+        const intersection_top_and_tar = topLine.calcIntersectionPoint(tarLine)
         topDistance = calcDistance(
             intersection_top_and_tar,
             topLine,
-            f_edge,
-            l_edge,
+            tarLine,
             callbackCompare,
             axis,
         )
@@ -198,25 +188,19 @@ function nearestNeighborPolygon(main_shape, polygons) {
         //     midLine.first,
         //     midLine.last,
         // )
-        // midDistance = calcDistance(intersection_mid_and_tar, midLine, f_edge, l_edge, callbackCompare, axis)
+        // midDistance = calcDistance(intersection_mid_and_tar, midLine, tarLine, callbackCompare, axis)
 
         if (
-            !pointOverlap(f_edge, botLine.first) &&
-            !pointOverlap(f_edge, botLine.last) &&
-            !pointOverlap(l_edge, botLine.first) &&
-            !pointOverlap(l_edge, botLine.last)
+            !f_edge.overlap(botLine.first) &&
+            !f_edge.overlap(botLine.last) &&
+            !l_edge.overlap(botLine.first) &&
+            !l_edge.overlap(botLine.last)
         ) {
-            const intersection_bot_and_tar = calcIntersectionPoint(
-                botLine.first,
-                botLine.last,
-                f_edge,
-                l_edge,
-            )
+            const intersection_bot_and_tar = botLine.calcIntersectionPoint(tarLine)
             botDistance = calcDistance(
                 intersection_bot_and_tar,
                 botLine,
-                f_edge,
-                l_edge,
+                tarLine,
                 callbackCompare,
                 axis,
             )
@@ -235,19 +219,14 @@ function nearestNeighborPolygon(main_shape, polygons) {
 
         return Math.min(topDistance, botDistance, midDistance)
 
-        function calcDistance(intersectionPoint, main_line, f_edge, l_edge, callbackCompare, axis) {
+        function calcDistance(intersectionPoint, main_line, tarLine, callbackCompare, axis) {
             if (intersectionPoint && typeof intersectionPoint !== 'number') {
                 if (!callbackCompare(intersectionPoint, main_line)) return Infinity
                 const commonAxis = axis === 'x' ? 'y' : 'x'
-                const inside = checkPointInsideAvoidTwoHead(
-                    intersectionPoint,
-                    f_edge,
-                    l_edge,
-                    commonAxis,
-                )
+                const inside = tarLine.isPointInsideAvoidTwoHead(intersectionPoint, commonAxis)
                 if (inside) {
-                    const distanceF = calcDistancePointToPoint(main_line.first, intersectionPoint)
-                    const distanceL = calcDistancePointToPoint(main_line.last, intersectionPoint)
+                    const distanceF = main_line.first.calcDistanceToPoint(intersectionPoint)
+                    const distanceL = main_line.last.calcDistanceToPoint(intersectionPoint)
                     return Math.min(distanceF, distanceL)
                 }
             }
@@ -283,96 +262,6 @@ function checkIntersectionBulletAndObj({ angle, v0, forceWind }, shape_players, 
     const equationBullet = getEquationBullet({ angle, vo, forceWind })
 }
 
-function calcDistancePoint_PointOnLineCommonAxis(point, line_f_p, line_l_p, distanceForAxis) {
-    /**
-     * B o\       distanceForAxis = 'x' | y↑____B_o\       distanceForAxis = 'y'
-     *     \<----->o Point              |  ¦I      |\       => change y location
-     *     |\   change x location       |  ¦       | \
-     *     | \o A                       | O¦_Point o  \o A
-     *  O——I———————Point—————→x (Ox)   |
-     *     |-result-|                   |  result = I_y - Point_y
-     * => result(x) = I[distanceForAxis] - Point[distanceForAxis] | result(y) = - result(x)
-     */
-    const commonAxis = distanceForAxis === 'x' ? 'y' : 'x'
-    if (!checkPointInside(point, line_f_p, line_l_p, commonAxis)) return -Infinity
-    // default for axis = 'y'
-    const pointInLine = {
-        x: point.x,
-        y: findYFromXInStraightLine(point.x, line_f_p, line_l_p),
-    }
-    if (distanceForAxis === 'x') {
-        pointInLine.x = findXFromYInStraightLine(point.y, line_f_p, line_l_p)
-        pointInLine.y = point.y
-    }
-    const result = point[distanceForAxis] - pointInLine[distanceForAxis]
-
-    if (distanceForAxis === 'y') return -result
-    return result
-}
-
-function calcDistancePointToPoint(p1, p2, axis) {
-    return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
-}
-
-function calcIntersectionPoint(l_1_p1, l_1_p2, l_2_p1, l_2_p2) {
-    const line1 = createVariableLine(l_1_p1, l_1_p2)
-    const line2 = createVariableLine(l_2_p1, l_2_p2)
-
-    if (line1.a === line2.a && line1.b === line2.b) return Infinity
-    if (!line1.isYExist) {
-        if (!line2.isYExist) {
-            return null
-        }
-        const x = -line1.b / line1.a
-        return { x, y: line2.a * x + line2.b }
-    }
-    if (!line2.isYExist) {
-        // <=> line1.isYExist && !line2.isYExist
-        const x = -line2.b / line2.a
-        if (!Number.isFinite(x)) return x
-        return { x, y: line1.a * x + line1.b }
-    }
-    if (line1.a === line2.a) return null
-    const x = (line2.b - line1.b) / (line1.a - line2.a)
-    return { x, y: line1.a * x + line1.b }
-}
-
-function checkInside(main_f_point, main_l_point, polygon_f_point, polygon_l_point, axis) {
-    /** Check main_f and main_l points inside space area of polygon, by axis.
-     * |	main_f			|
-     * |			main_l	|
-     * |					|
-     * polygon_f_point  polygon_l_point
-     */
-    // cách 1 -> bug
-    // const m_f_inside = checkPointInside(main_f_point, polygon_f_point, polygon_l_point, axis)
-    // const m_l_inside = checkPointInside(main_l_point, polygon_f_point, polygon_l_point, axis)
-    // return m_f_inside && m_l_inside
-    // cách 2
-    const m_f = main_f_point[axis]
-    const m_l = main_l_point[axis]
-    const p_f = polygon_f_point[axis]
-    const p_l = polygon_l_point[axis]
-
-    const twoPointAreAllLarger = m_f > p_f && m_l > p_f && m_f > p_l && m_l > p_l
-    const twoPointAreAllSmaller = m_f < p_f && m_l < p_f && m_f < p_l && m_l < p_l
-    return !twoPointAreAllSmaller && !twoPointAreAllLarger // or !(twoPointAreAllSmaller || twoPointAreAllLarger)
-}
-
-function checkPointInside(point, firstPoint, lastPoint, axis) {
-    const valuePoint = point[axis]
-    const f = firstPoint[axis]
-    const l = lastPoint[axis]
-    return !(valuePoint > f && valuePoint > l) && !(valuePoint < f && valuePoint < l)
-}
-
-function checkPointInsideAvoidTwoHead(point, firstPoint, lastPoint, axis) {
-    const valuePoint = point[axis]
-    const f = firstPoint[axis]
-    const l = lastPoint[axis]
-    return !(valuePoint >= f && valuePoint >= l) && !(valuePoint <= f && valuePoint <= l)
-}
-
 //   h
 // ______ 1 2
 // |	|
@@ -397,19 +286,6 @@ function createShapePlayer(x3, y3, angle) {
     return shape
 }
 
-function createVariableLine(p1, p2) {
-    // y = ax + b | ax + b = 0
-    let a = -(p1.y - p2.y)
-    let b = -(p1.x * p2.y - p1.y * p2.x)
-    const coefficient = p2.x - p1.x
-    const isYExist = coefficient !== 0
-    if (isYExist) {
-        a /= coefficient
-        b /= coefficient
-    }
-    return { a, b, isYExist }
-}
-
 function newPointFromPointAndVector(point, vectorU) {
     const vectorN = { a: -vectorU.b, b: vectorU.a }
     if (vectorN.b === 0)
@@ -431,16 +307,6 @@ function newPointFromPointAndVector(point, vectorU) {
     }
 }
 
-function findXFromYInStraightLine(y, point1, point2) {
-    // console.log('Data received: ', x, ", ", point1, ', ', point2)
-    return (-(point2.x - point1.x) * (y - point1.y)) / (point1.y - point2.y) + point1.x
-}
-
-function findYFromXInStraightLine(x, point1, point2) {
-    // console.log('Data received: ', x, ", ", point1, ', ', point2)
-    return (-(point1.y - point2.y) * (x - point1.x)) / (point2.x - point1.x) + point1.y
-}
-
 function directionVector(p_center, p_direct, angle) {
     const v = {
         x: p_direct.x - p_center.x,
@@ -452,145 +318,187 @@ function directionVector(p_center, p_direct, angle) {
     p_direct.y = p_center.y - v.x * Math.sin(angleRad) + v.y * Math.cos(angleRad)
 }
 
-//  true RightAngle | => newAngle = v + g = v + arctan(rightAngle_l_p / rightAngle_f_p)
-//      |\
-//      |v\	v=90			v = 0
-// f_p o\---|o  rightAngle   o---/o l_p
-//       \g |       |	     |  /
-//        \ |       |	     |g/
-//         \|o l_p  |  f_p  o|/
-function calculateAngle(f_p, l_p) {
-    /**
-     *     | => 0deg     ___________ => 90deg     A\--| C(xB, yA)   C(xA, yB)|--/B
-     *     |                                        \ |                      | /
-     *     |                                         \|B                    A|/
-     */
-    if (f_p.x === l_p.x) return 0
-    if (f_p.y === l_p.y) return 90
-    const rightAngle = {
-        x: f_p.x,
-        y: l_p.y,
-    }
-    let tempAngle = 0
-
-    if (f_p.y > l_p.y) {
-        rightAngle.x = l_p.x
-        rightAngle.y = f_p.y
-        tempAngle = 90
-    }
-
-    const lineNear = Math.sqrt((f_p.x - rightAngle.x) ** 2 + (f_p.y - rightAngle.y) ** 2)
-    const lineFront = Math.sqrt((l_p.x - rightAngle.x) ** 2 + (l_p.y - rightAngle.y) ** 2)
-
-    const newAngle = convertRadToDeg(Math.atan(lineFront / lineNear))
-    return tempAngle + newAngle
-}
-
-function createVector(p1, p2) {
-    return {
-        x: p2.x - p1.x,
-        y: p2.y - p1.y,
-    }
-}
-
-function pointOverlap(p1, p2) {
-    return p1.x === p2.x && p1.y === p2.y
-}
-
-function findIntersectionParabolaAndStraightLine(parabola, line) {
-    const l = createVariableLine(line.first, line.last)
-    const equationL2 = new Parabola().copy(parabola).sumLine(line)
-    const xIntersection = solveEquationLevel2(equationL2)
-    if (!xIntersection) return null
-    const intersection = []
-    xIntersection.forEach((x) => {
-        const newIntersection = {
-            x,
-            y: equationL2.computeY(x),
-        }
-        intersection.push(newIntersection)
-    })
-
-    return intersection
-}
-
-function computeDelta(a, b, c) {
-    // y = ax^2 + bx + c
-    return b * b - 4 * a * c
-}
-
-function solveEquationLevel2({ a, b, c }) {
-    const delta = computeDelta(a, b, c)
-
-    if (delta > 0) {
-        const root1 = (-b + Math.sqrt(delta)) / (2 * a)
-        const root2 = (-b - Math.sqrt(delta)) / (2 * a)
-        return [root1, root2]
-    } else if (delta === 0) {
-        const root = -b / (2 * a)
-        return [root]
-    }
-    return null
-}
-
 module.exports = {
     getLocationOnOxy,
     nearestNeighborPolygon,
-    checkInside,
-    checkPointInside,
-    calcDistancePoint_PointOnLineCommonAxis,
     createShapePlayer,
-    findXFromYInStraightLine,
-    findYFromXInStraightLine,
     directionVector,
-    calculateAngle,
-    solveEquationLevel2,
 }
 
-function isPointInPolygon(point, vertices) {
-    const numVertices = vertices.length
-    let intersections = 0
+// function isPointInPolygon(point, vertices) {
+//     const numVertices = vertices.length
+//     let intersections = 0
 
-    for (let i = 0; i < numVertices; i++) {
-        const indexLastPoint = (i + 1) % numVertices
-        const f_point = vertices[i]
-        const l_point = vertices[indexLastPoint]
+//     for (let i = 0; i < numVertices; i++) {
+//         const indexLastPoint = (i + 1) % numVertices
+//         const f_point = vertices[i]
+//         const l_point = vertices[indexLastPoint]
 
-        if (
-            (f_point.y <= point.y && point.y < l_point.y) ||
-            (l_point.y <= point.y && point.y < f_point.y)
-        ) {
-            if (
-                point.x <
-                ((l_point.x - f_point.x) * (point.y - f_point.y)) / (l_point.y - f_point.y) +
-                    f_point.x
-            )
-                intersections += 1
-        }
-    }
+//         if (
+//             (f_point.y <= point.y && point.y < l_point.y) ||
+//             (l_point.y <= point.y && point.y < f_point.y)
+//         ) {
+//             if (
+//                 point.x <
+//                 ((l_point.x - f_point.x) * (point.y - f_point.y)) / (l_point.y - f_point.y) +
+//                     f_point.x
+//             )
+//                 intersections += 1
+//         }
+//     }
 
-    return intersections % 2 === 1
-}
+//     return intersections % 2 === 1
+// }
 
-// distance ⊥
-function calculateDistanceToEdge(point, f_edge, l_edge) {
-    const a = f_edge.y - l_edge.y
-    const b = l_edge.x - f_edge.x
-    const c = f_edge.x * l_edge.y - l_edge.x * f_edge.y
-    const numerator = Math.abs(a * point.x + b * point.y + c)
-    const denominator = Math.sqrt(a ** 2 + b ** 2)
-    // console.log(point, ', ', f_edge, ', ', l_edge, ', distance: ', numerator / denominator)
+// // distance ⊥
+// function calculateDistanceToEdge(point, f_edge, l_edge) {
+//     const a = f_edge.y - l_edge.y
+//     const b = l_edge.x - f_edge.x
+//     const c = f_edge.x * l_edge.y - l_edge.x * f_edge.y
+//     const numerator = Math.abs(a * point.x + b * point.y + c)
+//     const denominator = Math.sqrt(a ** 2 + b ** 2)
+//     // console.log(point, ', ', f_edge, ', ', l_edge, ', distance: ', numerator / denominator)
 
-    return numerator / denominator
-}
+//     return numerator / denominator
+// }
 
-function is3PointOnCommonLine(p1, p2, p3) {
-    // v12.x / v13.x = v12.y / v13.y <=> v12.x * v13.y = v12.y * v13.x | k = v13.x / v12.x => v13.y / v12.y = k
-    if (pointOverlap(p1, p2) || pointOverlap(p1, p3)) return true
-    const v12 = createVector(p1, p2)
-    const v13 = createVector(p1, p3)
-    const k = v13.x / v12.x
-    const kq = v13.y - v12.y * k
+// function is3PointOnCommonLine(p1, p2, p3) {
+//     // v12.x / v13.x = v12.y / v13.y <=> v12.x * v13.y = v12.y * v13.x | k = v13.x / v12.x => v13.y / v12.y = k
+//     const point1 = new Point(p1.x, p1.y)
+//     if (point1.overlap(p2) || point1.overlap(p3)) return true
+//     const l1 = new Line().init(p1, p2)
+//     const l2 = new Line().init(p1, p3)
+//     const v12 = l1.createVector()
+//     const v13 = l2.createVector()
+//     const k = v13.x / v12.x
+//     const kq = v13.y - v12.y * k
 
-    return Math.abs(kq) < 1e-8
-}
+//     return Math.abs(kq) < 1e-8
+// }
+
+// function pointOverlap(p1, p2) {
+//     return p1.x === p2.x && p1.y === p2.y
+// }
+
+// function createVector(p1, p2) {
+//     return {
+//         x: p2.x - p1.x,
+//         y: p2.y - p1.y,
+//     }
+// }
+
+// //  true RightAngle | => newAngle = v + g = v + arctan(rightAngle_l_p / rightAngle_f_p)
+// //      |\
+// //      |v\	v=90			v = 0
+// // f_p o\---|o  rightAngle   o---/o l_p
+// //       \g |       |	     |  /
+// //        \ |       |	     |g/
+// //         \|o l_p  |  f_p  o|/
+// function calculateAngle(f_p, l_p) {
+//     /**
+//      *     | => 0deg     ___________ => 90deg     A\--| C(xB, yA)   C(xA, yB)|--/B
+//      *     |                                        \ |                      | /
+//      *     |                                         \|B                    A|/
+//      */
+//     if (f_p.x === l_p.x) return 0
+//     if (f_p.y === l_p.y) return 90
+//     const rightAngle = {
+//         x: f_p.x,
+//         y: l_p.y,
+//     }
+//     let tempAngle = 0
+
+//     if (f_p.y > l_p.y) {
+//         rightAngle.x = l_p.x
+//         rightAngle.y = f_p.y
+//         tempAngle = 90
+//     }
+
+//     const lineNear = Math.sqrt((f_p.x - rightAngle.x) ** 2 + (f_p.y - rightAngle.y) ** 2)
+//     const lineFront = Math.sqrt((l_p.x - rightAngle.x) ** 2 + (l_p.y - rightAngle.y) ** 2)
+
+//     const newAngle = convertRadToDeg(Math.atan(lineFront / lineNear))
+//     return tempAngle + newAngle
+// }
+
+// function calcIntersectionPoint(l_1_p1, l_1_p2, l_2_p1, l_2_p2) {
+//     const line1 = createVariableLine(l_1_p1, l_1_p2)
+//     const line2 = createVariableLine(l_2_p1, l_2_p2)
+
+//     if (line1.a === line2.a && line1.b === line2.b) return Infinity
+//     if (!line1.isYExist) {
+//         if (!line2.isYExist) {
+//             return null
+//         }
+//         const x = -line1.b / line1.a
+//         return { x, y: line2.a * x + line2.b }
+//     }
+//     if (!line2.isYExist) {
+//         // <=> line1.isYExist && !line2.isYExist
+//         const x = -line2.b / line2.a
+//         if (!Number.isFinite(x)) return x
+//         return { x, y: line1.a * x + line1.b }
+//     }
+//     if (line1.a === line2.a) return null
+//     const x = (line2.b - line1.b) / (line1.a - line2.a)
+//     return { x, y: line1.a * x + line1.b }
+// }
+
+// function createVariableLine(p1, p2) {
+//     // y = ax + b | ax + b = 0
+//     let a = -(p1.y - p2.y)
+//     let b = -(p1.x * p2.y - p1.y * p2.x)
+//     const coefficient = p2.x - p1.x
+//     const isYExist = coefficient !== 0
+//     if (isYExist) {
+//         a /= coefficient
+//         b /= coefficient
+//     }
+//     return { a, b, isYExist }
+// }
+
+// function checkPointInside(point, firstPoint, lastPoint, axis) {
+//     const valuePoint = point[axis]
+//     const f = firstPoint[axis]
+//     const l = lastPoint[axis]
+//     return !(valuePoint > f && valuePoint > l) && !(valuePoint < f && valuePoint < l)
+// }
+
+// function checkPointInsideAvoidTwoHead(point, firstPoint, lastPoint, axis) {
+//     const valuePoint = point[axis]
+//     const f = firstPoint[axis]
+//     const l = lastPoint[axis]
+//     return !(valuePoint >= f && valuePoint >= l) && !(valuePoint <= f && valuePoint <= l)
+// }
+
+// function findXFromYInStraightLine(y, point1, point2) {
+//     // console.log('Data received: ', x, ", ", point1, ', ', point2)
+//     return (-(point2.x - point1.x) * (y - point1.y)) / (point1.y - point2.y) + point1.x
+// }
+
+// function findYFromXInStraightLine(x, point1, point2) {
+//     // console.log('Data received: ', x, ", ", point1, ', ', point2)
+//     return (-(point1.y - point2.y) * (x - point1.x)) / (point2.x - point1.x) + point1.y
+// }
+
+// function checkInside(main_f_point, main_l_point, polygon_f_point, polygon_l_point, axis) {
+//     /** Check main_f and main_l points inside space area of polygon, by axis.
+//      * |	main_f			|
+//      * |			main_l	|
+//      * |					|
+//      * polygon_f_point  polygon_l_point
+//      */
+//     // cách 1 -> bug
+//     // const m_f_inside = checkPointInside(main_f_point, polygon_f_point, polygon_l_point, axis)
+//     // const m_l_inside = checkPointInside(main_l_point, polygon_f_point, polygon_l_point, axis)
+//     // return m_f_inside && m_l_inside
+//     // cách 2
+//     const m_f = main_f_point[axis]
+//     const m_l = main_l_point[axis]
+//     const p_f = polygon_f_point[axis]
+//     const p_l = polygon_l_point[axis]
+
+//     const twoPointAreAllLarger = m_f > p_f && m_l > p_f && m_f > p_l && m_l > p_l
+//     const twoPointAreAllSmaller = m_f < p_f && m_l < p_f && m_f < p_l && m_l < p_l
+//     return !twoPointAreAllSmaller && !twoPointAreAllLarger // or !(twoPointAreAllSmaller || twoPointAreAllLarger)
+// }
