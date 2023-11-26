@@ -7,6 +7,10 @@
     "maxCard": 40,
     "maxWidthStairGame": 1000,
     "maxHeightStairGame": 3400,
+    "math": {
+        "g": 9.8,
+        "m": 1
+    },
     "stair": {
         "maxWidth": 500
     },
