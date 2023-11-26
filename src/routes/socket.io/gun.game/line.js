@@ -1,4 +1,5 @@
 const Point = require('./point')
+const MathHelper = require('./math.helper')
 
 class Line {
     constructor() {
@@ -24,6 +25,7 @@ class Line {
         }
     }
 
+    // AKA overlap on an axis
     isPointInside(point, axis) {
         const valuePoint = point[axis]
         const f = this.first[axis]
@@ -31,6 +33,7 @@ class Line {
         return !(valuePoint > f && valuePoint > l) && !(valuePoint < f && valuePoint < l)
     }
 
+    // AKA overlap on an axis
     isInside(mainLine, axis) {
         /** Check main_f and main_l points inside space area of polygon, by axis.
          * |	main_f			|
@@ -51,6 +54,20 @@ class Line {
         const twoPointAreAllLarger = m_f > p_f && m_l > p_f && m_f > p_l && m_l > p_l
         const twoPointAreAllSmaller = m_f < p_f && m_l < p_f && m_f < p_l && m_l < p_l
         return !twoPointAreAllSmaller && !twoPointAreAllLarger // or !(twoPointAreAllSmaller || twoPointAreAllLarger)
+    }
+
+    is3PointOnCommonLine(p1, p2, p3) {
+        // v12.x / v13.x = v12.y / v13.y <=> v12.x * v13.y = v12.y * v13.x | k = v13.x / v12.x => v13.y / v12.y = k
+        const point1 = new Point(p1.x, p1.y)
+        if (point1.overlap(p2) || point1.overlap(p3)) return true
+        const l1 = new Line().init(p1, p2)
+        const l2 = new Line().init(p1, p3)
+        const v12 = l1.createVector()
+        const v13 = l2.createVector()
+        const k = v13.x / v12.x
+        const kq = v13.y - v12.y * k
+
+        return Math.abs(kq) < 1e-8
     }
 
     isPointInsideAvoidTwoHead(point, axis) {
@@ -144,7 +161,7 @@ class Line {
         const lineNear = Math.sqrt((f_p.x - rightAngle.x) ** 2 + (f_p.y - rightAngle.y) ** 2)
         const lineFront = Math.sqrt((l_p.x - rightAngle.x) ** 2 + (l_p.y - rightAngle.y) ** 2)
 
-        const newAngle = convertRadToDeg(Math.atan(lineFront / lineNear))
+        const newAngle = MathHelper.radToDeg(Math.atan(lineFront / lineNear))
         return tempAngle + newAngle
     }
 
@@ -174,14 +191,6 @@ class Line {
         if (distanceForAxis === 'y') return -result
         return result
     }
-}
-
-function convertDegToRad(deg) {
-    return (deg * Math.PI) / 180
-}
-
-function convertRadToDeg(rad) {
-    return (rad * 180) / Math.PI
 }
 
 module.exports = Line

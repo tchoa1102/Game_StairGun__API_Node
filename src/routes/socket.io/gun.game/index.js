@@ -10,9 +10,11 @@ const {
     checkPointInside,
 } = require('./helper')
 const LocationAtTime = require('./locationAtTime')
+const Bullet = require('./bullet')
 
 module.exports = function (socket, io) {
     const gunGame = new GunGame(socket, io)
+    gunGame.gun({ angle: 45, velocity_0: 34 })
 
     socket.on('gun-game/to-left', (data) => gunGame.toLeft(data))
     socket.on('gun-game/to-right', (data) => gunGame.toRight(data))
@@ -185,8 +187,13 @@ class GunGame {
         }
     }
 
-    gun({ angle, force }) {
+    gun({ angle, velocity_0 }) {
         try {
+            const windForce = 1.1
+            const playerShapes = []
+            const polygonShape = this.socket.handshake.match.objects
+            const bullet = new Bullet(100, 100, angle, velocity_0, windForce)
+            bullet.checkIntersectionBulletAndObj(playerShapes, polygonShape)
         } catch (e) {
             console.log(e)
             return
