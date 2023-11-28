@@ -248,31 +248,6 @@ module.exports = {
     directionVector,
 }
 
-// function isPointInPolygon(point, vertices) {
-//     const numVertices = vertices.length
-//     let intersections = 0
-
-//     for (let i = 0; i < numVertices; i++) {
-//         const indexLastPoint = (i + 1) % numVertices
-//         const f_point = vertices[i]
-//         const l_point = vertices[indexLastPoint]
-
-//         if (
-//             (f_point.y <= point.y && point.y < l_point.y) ||
-//             (l_point.y <= point.y && point.y < f_point.y)
-//         ) {
-//             if (
-//                 point.x <
-//                 ((l_point.x - f_point.x) * (point.y - f_point.y)) / (l_point.y - f_point.y) +
-//                     f_point.x
-//             )
-//                 intersections += 1
-//         }
-//     }
-
-//     return intersections % 2 === 1
-// }
-
 // // distance ⊥
 // function calculateDistanceToEdge(point, f_edge, l_edge) {
 //     const a = f_edge.y - l_edge.y

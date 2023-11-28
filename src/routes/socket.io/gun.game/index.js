@@ -11,10 +11,16 @@ const {
 } = require('./helper')
 const LocationAtTime = require('./locationAtTime')
 const Bullet = require('./bullet')
+const BulletRes = require('./bulletRes')
+const Point = require('./point')
+const Line = require('./line')
+const Circle = require('./circle')
+const GunRes = require('./gunRes')
+const MathHelper = require('./math.helper')
 
 module.exports = function (socket, io) {
     const gunGame = new GunGame(socket, io)
-    gunGame.gun({ angle: 45, velocity_0: 26 })
+    gunGame.gun({ angle: 35, velocity_0: 26 })
 
     socket.on('gun-game/to-left', (data) => gunGame.toLeft(data))
     socket.on('gun-game/to-right', (data) => gunGame.toRight(data))
@@ -187,19 +193,100 @@ class GunGame {
         }
     }
 
+    // on: gun-game/gun | emit: gun-game/gun-status
     gun({ angle, velocity_0 }) {
         try {
+            const angleSign = angle > 0
+            angle = 90 - angle
             const windForce = 1.1
+            const playersInfo = this.socket.handshake.match.players
+            const player = this.socket.handshake.match.player
+            const centerPlayer = new Point(
+                player.mainGame.bottomLeft.x + 1,
+                -Math.abs(player.mainGame.bottomLeft.y) + 1,
+            )
             const playerShapes = []
+            const playersData = playersInfo.reduce((shapes, p) => {
+                const tarPlayer = this.io.sockets.sockets.get(p.socketId)
+                if (!tarPlayer) return shapes
+                const dataMainGame = { ...tarPlayer.handshake.match.player.mainGame }
+                const data = { ...p.player, mainGame: dataMainGame }
+                dataMainGame.shape = createShapePlayer(
+                    dataMainGame.bottomLeft.x,
+                    dataMainGame.bottomLeft.y,
+                    dataMainGame.characterGradient,
+                )
+                shapes.push(data)
+                playersShapes.push(dataMainGame.shape)
+                if (p._id.toString() === player.target._id) {
+                    const center = new Line()
+                        .init(dataMainGame.shape[3], dataMainGame.shape[0])
+                        .center()
+                    centerPlayer.copy(center)
+                }
+                return shapes
+            }, [])
+            console.log('Player shapes: ', playerShapes)
             const polygonShape = this.socket.handshake.match.objects
-            const bullet = new Bullet(100, 100, angle, velocity_0, windForce)
-            bullet.checkIntersectionBulletAndObj(playerShapes, polygonShape)
+            const bullet = new Bullet(centerPlayer.x, centerPlayer.y, angle, velocity_0, windForce)
+            const funcCompare = angleSign ? moreX : lessX
+            const collision = bullet.findCollision(playerShapes, polygonShape, funcCompare)
+            console.log(collision)
+
+            const res = new GunRes([], [])
+            // #region calculate when collision
+            if (collision) {
+                collision.location.y = bullet.parabola.computeY(collision.location.x)
+                const circleEffect = new Circle(collision.location, 10)
+                // playerInfo = { target: {_id}, mainGame: { ..., shape } }
+                const playerCollision = playersData.reduce((result, playerInfo) => {
+                    const shape = playerInfo.mainGame.shape
+                    const checkResult = circleEffect.isPolygonCollision(shape)
+                    if (checkResult.isCollection) {
+                        // result.push()
+                        // ----------------------------------------------------------------
+                        // calculate damage
+                    }
+
+                    return result
+                }, [])
+                res.players = playerCollision
+            }
+            // #endregion calculate when collision
+
+            // #region calculate list bullet's location
+            const bullet0 = new BulletRes(new Point(centerPlayer.x, centerPlayer.y), angle)
+            const locationsBullet = [bullet0]
+
+            for (let i = 0.5; i <= configGame.gunGame.battlePhase; i += 0.5) {
+                const x = locationsBullet[locationsBullet.length - 1].point.x + 1
+                const bulletPoint = new Point(x, bullet.parabola.computeY(x))
+                const preBullet = locationsBullet[locationsBullet.length - 1].point
+                const lineXAndPreX = new Line().init(preBullet, bulletPoint)
+                const locationBullet = new BulletRes(bulletPoint, lineXAndPreX.calcAngle())
+                if (collision && locationBullet.point.x >= collision.location.x) break
+                locationsBullet.push(locationBullet)
+            }
+            res.bullets = locationsBullet
+            // #endregion calculate list bullet's location
+
+            console.log(res)
+            return this.io.to(this.socket.handshake.idRoom).emit('gun-game/gun-status', res)
         } catch (e) {
             console.log(e)
             return
         }
+
+        function moreX(locationX, collisionX) {
+            return collisionX - locationX > 1e-8
+        }
+
+        function lessX(locationX, collisionX) {
+            return locationX - collisionX > 1e-8
+        }
     }
 
+    // on: gun-game/use-card | emit: gun-game/use-card/res
     useCard({ cardId }) {
         try {
         } catch (e) {
@@ -208,6 +295,7 @@ class GunGame {
         }
     }
 
+    // on: gun-game/use-skill | emit: gun-game/use-skill/res
     useSkill({ skillId }) {
         try {
         } catch (e) {

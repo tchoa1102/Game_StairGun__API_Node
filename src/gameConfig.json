@@ -11,6 +11,11 @@
         "g": 9.8,
         "m": 1
     },
+    "gunGame": {
+        "standbyPhase": 10,
+        "battlePhase": 15,
+        "endPhase": 5
+    },
     "stair": {
         "maxWidth": 500
     },

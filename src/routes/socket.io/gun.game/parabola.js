@@ -1,4 +1,6 @@
+const Point = require('./point')
 const MathHelper = require('./math.helper')
+const Collision = require('./collision')
 
 class Parabola {
     constructor(a, b, c) {
@@ -18,27 +20,28 @@ class Parabola {
         // @with line: {a, b}, y = ax + b
         // ax^2 + bx + c = ax + b
         this.b -= line.a
-        this.c -= line.c
+        this.c -= line.b
         return this
     }
 
     computeY(x) {
-        return a * x ** 2 + b * x + c
+        return this.a * x ** 2 + this.b * x + this.c
     }
 
     intersectionWithStraightLine(line) {
         const l = line.createVariable()
         const equationL2 = new Parabola().copy(this).sumLine(l)
         const xIntersection = MathHelper.solveEquationLevel2(equationL2)
-        if (!xIntersection) return null
-        const intersection = []
-        xIntersection.forEach((x) => {
-            const newIntersection = {
-                x,
-                y: equationL2.computeY(x),
+        if (!xIntersection) return []
+        const intersection = xIntersection.reduce((result, x) => {
+            const pointInter = new Point(x)
+            if (line.isPointInside(pointInter)) {
+                const newIntersection = new Collision(pointInter, line)
+
+                result.push(newIntersection)
             }
-            intersection.push(newIntersection)
-        })
+            return result
+        }, [])
 
         return intersection
     }

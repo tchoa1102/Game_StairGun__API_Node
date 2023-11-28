@@ -18,6 +18,10 @@ class Line {
         this.last = newLine.last
     }
 
+    center() {
+        return new Point((this.first.x + this.last.x) / 2, (this.first.y + this.last.y) / 2)
+    }
+
     createVector() {
         return {
             x: this.last.x - this.first.x,
@@ -25,8 +29,12 @@ class Line {
         }
     }
 
+    distance() {
+        return Math.sqrt((this.first.x - this.last.x) ** 2 + (this.first.y - this.last.y) ** 2)
+    }
+
     // AKA overlap on an axis
-    isPointInside(point, axis) {
+    isPointInside(point, axis = 'x') {
         const valuePoint = point[axis]
         const f = this.first[axis]
         const l = this.last[axis]
@@ -158,10 +166,10 @@ class Line {
             tempAngle = 90
         }
 
-        const lineNear = Math.sqrt((f_p.x - rightAngle.x) ** 2 + (f_p.y - rightAngle.y) ** 2)
-        const lineFront = Math.sqrt((l_p.x - rightAngle.x) ** 2 + (l_p.y - rightAngle.y) ** 2)
+        const lineNear = new Line().init(f_p, rightAngle)
+        const lineFront = new Line().init(l_p, rightAngle)
 
-        const newAngle = MathHelper.radToDeg(Math.atan(lineFront / lineNear))
+        const newAngle = MathHelper.radToDeg(Math.atan(lineFront.distance() / lineNear.distance()))
         return tempAngle + newAngle
     }
 
