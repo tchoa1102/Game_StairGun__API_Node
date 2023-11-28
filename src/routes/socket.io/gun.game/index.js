@@ -43,7 +43,7 @@ class GunGame {
             const dataPOnMainGame = playerData.mainGame
             const objsMap = this.socket.handshake.match.objects
 
-            console.log('+++++\nBase location: ', dataPOnMainGame.bottomLeft, '\n+++++')
+            // console.log('+++++\nBase location: ', dataPOnMainGame.bottomLeft, '\n+++++')
             const playerShape = createShapePlayer(
                 dataPOnMainGame.bottomLeft.x,
                 dataPOnMainGame.bottomLeft.y,
@@ -53,7 +53,7 @@ class GunGame {
             console.log(playerShape)
             const nearest = nearestNeighborPolygon(playerShape, objsMap)
             // console.log('\np1: ', nearest.bottom.p1, '\np2: ', nearest.bottom.p2, '\nfollow: ', nearest.bottom.follow)
-            console.log('Left: ', nearest.left, '\nfollow: ', nearest.bottom.follow)
+            // console.log('Left: ', nearest.left, '\nfollow: ', nearest.bottom.follow)
             const followLine = nearest.bottom.follow
             if (
                 !Number.isFinite(followLine.distance) ||
@@ -96,7 +96,7 @@ class GunGame {
                 )
                 dataPOnMainGame.characterGradient = followLine.line.calcAngle()
             }
-            console.log('new location: ', dataPOnMainGame.bottomLeft, '\n---------\n')
+            // console.log('new location: ', dataPOnMainGame.bottomLeft, '\n---------\n')
             // #endregion update location
 
             // #region res
@@ -121,7 +121,7 @@ class GunGame {
             const dataPOnMainGame = playerData.mainGame
             const objsMap = this.socket.handshake.match.objects
 
-            console.log('+++++\nBase location: ', dataPOnMainGame.bottomLeft, '\n+++++')
+            // console.log('+++++\nBase location: ', dataPOnMainGame.bottomLeft, '\n+++++')
             const playerShape = createShapePlayer(
                 dataPOnMainGame.bottomLeft.x,
                 dataPOnMainGame.bottomLeft.y,
@@ -131,7 +131,7 @@ class GunGame {
             console.log(playerShape)
             const nearest = nearestNeighborPolygon(playerShape, objsMap)
             // console.log('\np1: ', nearest.bottom.p1, '\np2: ', nearest.bottom.p2, '\nfollow: ', nearest.bottom.follow)
-            console.log('right: ', nearest.right, '\nfollow: ', nearest.bottom.follow)
+            // console.log('right: ', nearest.right, '\nfollow: ', nearest.bottom.follow)
             const followLine = nearest.bottom.follow
             if (
                 !Number.isFinite(followLine.distance) ||
@@ -153,7 +153,7 @@ class GunGame {
                 } else if ((isNearestX2Finite && isFollowInFinite) || nearestX2Valid) {
                     followLine.copy(nearestX2)
                 }
-                console.log('New follow line: ', followLine)
+                // console.log('New follow line: ', followLine)
             }
 
             if (!Number.isFinite(followLine.distance)) {
@@ -174,7 +174,7 @@ class GunGame {
                 )
                 dataPOnMainGame.characterGradient = followLine.line.calcAngle()
             }
-            console.log('new location: ', dataPOnMainGame.bottomLeft, '\n---------\n')
+            // console.log('new location: ', dataPOnMainGame.bottomLeft, '\n---------\n')
             // #endregion update location
 
             // #region res
