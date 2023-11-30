@@ -19,13 +19,17 @@ const GunRes = require('./gunRes')
 const MathHelper = require('./math.helper')
 
 module.exports = function (socket, io) {
+    const baseUrl = 'gun-game'
     const gunGame = new GunGame(socket, io)
-    gunGame.gun({ angle: 35, velocity_0: 26 })
+    // gunGame.gun({ angle: 35, velocity_0: 26 })
 
-    socket.on('gun-game/to-left', (data) => gunGame.toLeft(data))
-    socket.on('gun-game/to-right', (data) => gunGame.toRight(data))
-    socket.on('gun-game/gun', (data) => gunGame.gun(data))
-    socket.on('gun-game/use-card', (data) => gunGame.useCard(data))
+    socket.on(baseUrl + '/to-left', (data) => gunGame.toLeft(data))
+    socket.on(baseUrl + '/to-right', (data) => gunGame.toRight(data))
+    socket.on(baseUrl + '/gun', (data, callback) => gunGame.gun(data, callback))
+    socket.on(baseUrl + '/use-card', (data) => gunGame.useCard(data))
+    socket.on(baseUrl + '/choose-velocity', (data, callback) =>
+        gunGame.chooseVelocity(data, callback),
+    )
 }
 
 class GunGame {
@@ -34,6 +38,7 @@ class GunGame {
         this.io = io
         this._id = socket.handshake.idPlayer
         this.vx = 1
+        this.baseUrl = 'gun-game'
     }
 
     // on: gun-game/to-left | emit: gun-game/update-location
@@ -194,8 +199,16 @@ class GunGame {
     }
 
     // on: gun-game/gun | emit: gun-game/gun-status
-    gun({ angle, velocity_0 }) {
+    gun({ angle, velocity_0 }, callback) {
         try {
+            const curMatch = this.socket.handshake.match
+            const phases = configGame.gunGame
+            if (curMatch.turn.turner !== this._id) return
+            if (curMatch.turn.phase !== phases.mainPhase.key) return
+            // call callback handle of client
+            callback()
+
+            // #region handle gun
             const angleSign = angle > 0
             angle = 90 - angle
             const windForce = 1.1
@@ -258,8 +271,11 @@ class GunGame {
             const bullet0 = new BulletRes(new Point(centerPlayer.x, centerPlayer.y), angle)
             const locationsBullet = [bullet0]
 
-            for (let i = 0.5; i <= configGame.gunGame.battlePhase; i += 0.5) {
-                const x = locationsBullet[locationsBullet.length - 1].point.x + 1
+            const callbackChangeLocationX = angleSign ? increaseX : decreaseX
+            for (let i = 0.5; i <= configGame.gunGame.battlePhase.value; i += 0.5) {
+                const x = callbackChangeLocationX(
+                    locationsBullet[locationsBullet.length - 1].point.x,
+                )
                 const bulletPoint = new Point(x, bullet.parabola.computeY(x))
                 const preBullet = locationsBullet[locationsBullet.length - 1].point
                 const lineXAndPreX = new Line().init(preBullet, bulletPoint)
@@ -271,12 +287,36 @@ class GunGame {
             // #endregion calculate list bullet's location
 
             console.log(res)
+            // #endregion handle gun
+
+            // start battle phase 15s
+            setTimeout(() => {
+                // calc damage
+                // <--code calc damage--------------------------------------->
+            }, phases.battlePhase * 1000)
+            // renew timeout to end phase
+            clearTimeout(curMatch.turn.timeoutNextTurn)
+            // The time to start next turn, t = battleTime + endTime
+            const timeUntilEndPhase = (phases.battlePhase.value + phases.endPhase.value) * 1000
+            curMatch.turn.timeoutNextTurn = setTimeout(() => {
+                console.log('\n-----------------------')
+                console.log('End this turn, start new turn!')
+                console.log('-----------------------')
+                // <--code choose next player on new turn-------------------->
+                curMatch.turn.turner = this._id
+                curMatch.turn.phase = phases.endPhase.key
+                this.io.to(this.socket.handshake.idRoom).emit(this.baseUrl + '/change-turn/res', {
+                    _id: curMatch._id,
+                    turner: this._id,
+                })
+            }, timeUntilEndPhase)
             return this.io.to(this.socket.handshake.idRoom).emit('gun-game/gun-status', res)
         } catch (e) {
             console.log(e)
             return
         }
 
+        // #region func
         function moreX(locationX, collisionX) {
             return collisionX - locationX > 1e-8
         }
@@ -284,6 +324,14 @@ class GunGame {
         function lessX(locationX, collisionX) {
             return locationX - collisionX > 1e-8
         }
+
+        function increaseX(x) {
+            return x + 1
+        }
+        function decreaseX(x) {
+            return x - 1
+        }
+        // #endregion func
     }
 
     // on: gun-game/use-card | emit: gun-game/use-card/res
@@ -299,6 +347,35 @@ class GunGame {
     useSkill({ skillId }) {
         try {
         } catch (e) {
+            console.log(e)
+            return
+        }
+    }
+
+    // on: gun-game/choose-velocity
+    chooseVelocity(dataAny, callback) {
+        try {
+            // renew timeout, set timeout of main phase
+            const match = this.socket.handshake.match
+            if (match.turn.turner !== this._id) return
+            const phases = configGame.gunGame
+            if (match.turn.phase !== phases.standbyPhase.key) return
+            match.turn.phase = phases.mainPhase.key
+            clearTimeout(match.turn.timeoutNextTurn)
+            match.turn.timeoutNextTurn = setTimeout(() => {
+                console.log('\n-----------------------')
+                console.log('End main phase, start new turn!')
+                console.log('-----------------------')
+                // <--code choose next player on new turn----------------------->
+                match.turn.turner = this._id
+                this.io.to(this.socket.handshake.idRoom).emit(this.baseUrl + '/change-turn/res', {
+                    _id: match._id,
+                    turner: this._id,
+                })
+            }, phases.mainPhase.value * 1000)
+            // call callback handle of client
+            callback()
+        } catch (error) {
             console.log(e)
             return
         }

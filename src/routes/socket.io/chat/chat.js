@@ -19,8 +19,9 @@ class Chat {
     }
 
     // on: chat/send | emit: chat/receiving
-    async sendMessage({ receiverId, message }, callback) { // receiverId = '' | [id]
-        if (message.trim().length === 0) return
+    async sendMessage({ receiverId, message }, callback) {
+        // receiverId = '' | [id]
+        if (!message || message.trim().length === 0) return
         try {
             // type: public | room | private
             const idRoom = this.socket.handshake.idRoom
@@ -48,10 +49,10 @@ class Chat {
             // await newMessage.save()
 
             const resMessage = {
-                    sender: { _id: this._id, name: this.name },
-                    receiver: { _id: receiverId },
-                    message: newMessage.value,
-                }
+                sender: { _id: this._id, name: this.name },
+                receiver: { _id: receiverId },
+                message: newMessage.value,
+            }
             console.log('receivedId: ', receiverId, ', Type: ', type, objMessage)
             if (type !== this.typeMessage[idRoom] && type !== this.typeMessage['']) {
                 // if send to player
@@ -71,7 +72,7 @@ class Chat {
         }
     }
 
-/*
+    /*
     // testMessage(data) {
     //     console.log(data)
     //     cardController

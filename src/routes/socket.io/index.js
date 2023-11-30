@@ -5,6 +5,7 @@ const gunGame = require('./gun.game/index')
 const room = require('./site/room')
 const { RoomModel, UserModel } = require('../../app/models')
 const RoomAddRes = require('./site/room/room.add.res')
+const configGame = require('../../gameConfig.json')
 
 const config = require('../../gameConfig.json')
 
@@ -1459,6 +1460,12 @@ module.exports = function (io) {
         socket.handshake.idRoom = '1'
         socket.join(socket.handshake.idRoom)
         socket.handshake.match = {
+            _id: '6528fb7d960eecd821e4040d',
+            turn: {
+                timeoutNextTurn: 0, // id timeout
+                turner: '115421543287322673156111',
+                phase: configGame.gunGame.standbyPhase.key,
+            },
             stairs: stairs,
             cards: cards,
             timeStart: '2023-10-13T08:10:37.875Z',

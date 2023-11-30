@@ -12,9 +12,22 @@
         "m": 1
     },
     "gunGame": {
-        "standbyPhase": 10,
-        "battlePhase": 15,
-        "endPhase": 5
+        "standbyPhase": {
+            "key": "standbyPhase",
+            "value": 10
+        },
+        "mainPhase": {
+            "key": "mainPhase",
+            "value": 15
+        },
+        "battlePhase": {
+            "key": "battlePhase",
+            "value": 15
+        },
+        "endPhase": {
+            "key": "endPhase",
+            "value": 5
+        }
     },
     "stair": {
         "maxWidth": 500

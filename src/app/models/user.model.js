@@ -15,12 +15,12 @@ const UserModel = new Schema(
         email: { type: String, default: null },
         picture: { type: String, default: null },
         level: { type: Number, default: 1 },
-        HP: { type: String, default: '100' }, // health point
-        STA: { type: String, default: '100' }, // stamina point
-        ATK: { type: String, default: '10' }, // attack point
-        DEF: { type: String, default: '5' }, // defense point
-        LUK: { type: String, default: '5' }, // lucky point
-        AGI: { type: String, default: '5' }, // agility point
+        HP: { type: Number, default: 100 }, // health point
+        STA: { type: Number, default: 100 }, // stamina point
+        ATK: { type: Number, default: 10 }, // attack point
+        DEF: { type: Number, default: 5 }, // defense point
+        LUK: { type: Number, default: 5 }, // lucky point
+        AGI: { type: Number, default: 5 }, // agility point
 
         gold: { type: Number, default: 0 },
 
@@ -38,18 +38,15 @@ const UserModel = new Schema(
         looks: {
             face: {
                 type: String,
-                default:
-                    '',
+                default: '',
             },
             body: {
                 type: String,
-                default:
-                    '',
+                default: '',
             },
             foot: {
                 type: String,
-                default:
-                    '',
+                default: '',
             },
             weapon: { type: String, default: '' },
         },
