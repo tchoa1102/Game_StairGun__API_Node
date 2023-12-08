@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 const nerdamer = require('nerdamer')
 const math = require('mathjs')
-const config = require('../gameConfig.json')
+const configGame = require('../gameConfig.json')
+const Turn = require('../routes/socket.io/turn')
 const { stairSchema } = require('../app/schemas')
 require('nerdamer/Algebra')
 require('nerdamer/Calculus')
@@ -80,15 +81,15 @@ function findIntersectionXLevel2(line1, line2) {
 function createStairs() {
     // @return Array[]
     const stairs = []
-    for (let i = 0; i < config.maxStair; i++) {
-        let width = Math.random() * (config.stair.maxWidth - 100) + 100
+    for (let i = 0; i < configGame.maxStair; i++) {
+        let width = Math.random() * (configGame.stair.maxWidth - 100) + 100
         let x = 0
         do {
-            x = Math.random() * (config.maxWidthStairGame - 100)
+            x = Math.random() * (configGame.maxWidthStairGame - 100)
         } while (stairs.find((stair) => stair.x === x) !== undefined)
         let y = 0
         do {
-            y = Math.random() * (config.maxHeightStairGame - 400) + 300
+            y = Math.random() * (configGame.maxHeightStairGame - 400) + 300
         } while (stairs.find((stair) => stair.y === y) !== undefined)
         const SStair = mongoose.model('stairschema', stairSchema)
         const stair = new SStair({ x, y, width })
@@ -102,11 +103,11 @@ function createCards(stairs) {
     // @return Array[]
     const cards = []
     const stairsPassed = []
-    while (cards.length < config.maxCard) {
+    while (cards.length < configGame.maxCard) {
         // find unique stair
-        let i = Math.floor(Math.random() * config.stairs.length)
+        let i = Math.floor(Math.random() * configGame.stairs.length)
         while (stairsPassed.find((j) => j === i) === undefined) {
-            i = Math.floor(Math.random() * config.stairs.length)
+            i = Math.floor(Math.random() * configGame.stairs.length)
         }
         const selectedUniqueStair = stair[i]
 
@@ -117,9 +118,32 @@ function createCards(stairs) {
     }
 }
 
+function startNewTurn(_this, match) {
+    console.log('\n-----------------------')
+    console.log('End this turn, start new turn!')
+    console.log('-----------------------')
+    // <--code choose next player on new turn-------------------->
+    const curTurn = match.logs[match.logs.length - 1]
+    const phases = configGame.gunGame
+    curTurn.phase = phases.endPhase.key
+    const timeOutStartNewTurn = setTimeout(
+        startNewTurn,
+        phases.standbyPhase.value * 1000,
+        _this,
+        match,
+    )
+    const newTurn = new Turn(match.logs.length, timeOutStartNewTurn, _this._id)
+    match.logs.push(newTurn)
+    _this.io.to(_this.socket.handshake.idRoom).emit(_this.baseUrl + '/change-turn/res', {
+        _id: match._id,
+        turner: _this._id,
+    })
+}
+
 module.exports = {
     createStairs,
     createCards,
     createLineFromTwoPoint,
     findIntersectionXLevel2,
+    startNewTurn,
 }

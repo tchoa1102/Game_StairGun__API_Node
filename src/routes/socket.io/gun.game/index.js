@@ -1,5 +1,6 @@
 const configGame = require('../../../gameConfig.json')
 const UpdateLocationRes = require('./updateLocationRes')
+const Turn = require('../turn')
 const {
     createShapePlayer,
     nearestNeighborPolygon,
@@ -17,12 +18,14 @@ const Line = require('./line')
 const Circle = require('./circle')
 const GunRes = require('./gunRes')
 const MathHelper = require('./math.helper')
+const { startNewTurn } = require('../../../shares')
 
 module.exports = function (socket, io) {
-    const baseUrl = 'gun-game'
     const gunGame = new GunGame(socket, io)
+    const baseUrl = gunGame.baseUrl
     // gunGame.gun({ angle: 35, velocity_0: 26 })
 
+    socket.on(baseUrl + '/lie', (data) => gunGame.lie(data))
     socket.on(baseUrl + '/to-left', (data) => gunGame.toLeft(data))
     socket.on(baseUrl + '/to-right', (data) => gunGame.toRight(data))
     socket.on(baseUrl + '/gun', (data, callback) => gunGame.gun(data, callback))
@@ -39,6 +42,35 @@ class GunGame {
         this._id = socket.handshake.idPlayer
         this.vx = 1
         this.baseUrl = 'gun-game'
+
+        this.keyActivities = {
+            show: 'show',
+            lieRight: 'lieRight',
+            lieLeft: 'lieLeft',
+            throwRight: 'throwRight',
+            throwLeft: 'throwLeft',
+            crawlRight: 'crawlRight',
+            crawlLeft: 'crawlLeft',
+        }
+    }
+
+    lie(req) {
+        try {
+            const playerData = this.socket.handshake.match.player
+            const dataPOnMainGame = playerData.mainGame
+            const res = new UpdateLocationRes(
+                this._id,
+                [new LocationAtTime(dataPOnMainGame, new Date().getTime())],
+                true,
+                req.event,
+            )
+            return this.io
+                .to(this.socket.handshake.idRoom)
+                .emit('gun-game/players/update-location', res)
+        } catch (error) {
+            console.log(error)
+            return
+        }
     }
 
     // on: gun-game/to-left | emit: gun-game/update-location
@@ -109,6 +141,7 @@ class GunGame {
                 this._id,
                 [new LocationAtTime(dataPOnMainGame, new Date().getTime())],
                 true,
+                this.keyActivities.crawlLeft,
             )
             return this.io
                 .to(this.socket.handshake.idRoom)
@@ -187,6 +220,7 @@ class GunGame {
                 this._id,
                 [new LocationAtTime(dataPOnMainGame, new Date().getTime())],
                 true,
+                this.keyActivities.crawlRight,
             )
             return this.io
                 .to(this.socket.handshake.idRoom)
@@ -203,8 +237,9 @@ class GunGame {
         try {
             const curMatch = this.socket.handshake.match
             const phases = configGame.gunGame
-            if (curMatch.turn.turner !== this._id) return
-            if (curMatch.turn.phase !== phases.mainPhase.key) return
+            const curTurn = curMatch.logs[curMatch.logs.length - 1]
+            if (curTurn.turner !== this._id) return
+            if (curTurn.phase !== phases.mainPhase.key) return
             // call callback handle of client
             callback()
 
@@ -295,21 +330,10 @@ class GunGame {
                 // <--code calc damage--------------------------------------->
             }, phases.battlePhase * 1000)
             // renew timeout to end phase
-            clearTimeout(curMatch.turn.timeoutNextTurn)
+            clearTimeout(curTurn.timeoutNextTurn)
             // The time to start next turn, t = battleTime + endTime
             const timeUntilEndPhase = (phases.battlePhase.value + phases.endPhase.value) * 1000
-            curMatch.turn.timeoutNextTurn = setTimeout(() => {
-                console.log('\n-----------------------')
-                console.log('End this turn, start new turn!')
-                console.log('-----------------------')
-                // <--code choose next player on new turn-------------------->
-                curMatch.turn.turner = this._id
-                curMatch.turn.phase = phases.endPhase.key
-                this.io.to(this.socket.handshake.idRoom).emit(this.baseUrl + '/change-turn/res', {
-                    _id: curMatch._id,
-                    turner: this._id,
-                })
-            }, timeUntilEndPhase)
+            curTurn.timeoutNextTurn = setTimeout(startNewTurn, timeUntilEndPhase, this, curMatch)
             return this.io.to(this.socket.handshake.idRoom).emit('gun-game/gun-status', res)
         } catch (e) {
             console.log(e)
@@ -337,6 +361,15 @@ class GunGame {
     // on: gun-game/use-card | emit: gun-game/use-card/res
     useCard({ cardId }) {
         try {
+            const match = this.socket.handshake.match
+            const card = match.cards.find((c) => c._id === cardId)
+            if (!card.isEnable || card.owner !== this._id) return
+
+            return this.io.to(this.socket.handshake.idRoom).emit(this.baseUrl + '/use-card/res', {
+                _id: match._id,
+                card: card.data._id,
+                owner: card.owner,
+            })
         } catch (e) {
             console.log(e)
             return
@@ -357,25 +390,21 @@ class GunGame {
         try {
             // renew timeout, set timeout of main phase
             const match = this.socket.handshake.match
-            if (match.turn.turner !== this._id) return
+            const curTurn = match.logs[match.logs.length - 1]
+            if (curTurn.turner !== this._id) return
             const phases = configGame.gunGame
-            if (match.turn.phase !== phases.standbyPhase.key) return
-            match.turn.phase = phases.mainPhase.key
-            clearTimeout(match.turn.timeoutNextTurn)
-            match.turn.timeoutNextTurn = setTimeout(() => {
-                console.log('\n-----------------------')
-                console.log('End main phase, start new turn!')
-                console.log('-----------------------')
-                // <--code choose next player on new turn----------------------->
-                match.turn.turner = this._id
-                this.io.to(this.socket.handshake.idRoom).emit(this.baseUrl + '/change-turn/res', {
-                    _id: match._id,
-                    turner: this._id,
-                })
-            }, phases.mainPhase.value * 1000)
+            if (curTurn.phase !== phases.standbyPhase.key) return
+            curTurn.phase = phases.mainPhase.key
+            clearTimeout(curTurn.timeoutNextTurn)
+            curTurn.timeoutNextTurn = setTimeout(
+                startNewTurn,
+                phases.mainPhase.value * 1000,
+                this,
+                match,
+            )
             // call callback handle of client
             callback()
-        } catch (error) {
+        } catch (e) {
             console.log(e)
             return
         }

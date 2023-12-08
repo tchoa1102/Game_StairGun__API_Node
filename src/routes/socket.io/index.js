@@ -1449,6 +1449,15 @@ const stairs = [
         _id: '6528fb7d960eecd821e4040a',
     },
 ]
+
+const turnConfig = {
+    id: 1,
+    timeoutNextTurn: 0, // id timeout
+    turner: '115421543287322673156111',
+    phase: configGame.gunGame.standbyPhase.key,
+    cards: [],
+}
+const logsPub = [turnConfig]
 // #endregion config card and stair
 
 module.exports = function (io) {
@@ -1461,12 +1470,9 @@ module.exports = function (io) {
         socket.join(socket.handshake.idRoom)
         socket.handshake.match = {
             _id: '6528fb7d960eecd821e4040d',
-            turn: {
-                timeoutNextTurn: 0, // id timeout
-                turner: '115421543287322673156111',
-                phase: configGame.gunGame.standbyPhase.key,
-            },
+            turn: turnConfig,
             stairs: stairs,
+            logs: logsPub,
             cards: cards,
             timeStart: '2023-10-13T08:10:37.875Z',
             windForce: 1.1,
