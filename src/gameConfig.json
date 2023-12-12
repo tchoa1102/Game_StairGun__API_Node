@@ -14,7 +14,7 @@
     "gunGame": {
         "standbyPhase": {
             "key": "standbyPhase",
-            "value": 10
+            "value": 11
         },
         "mainPhase": {
             "key": "mainPhase",

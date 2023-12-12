@@ -29,7 +29,8 @@ module.exports = function (socket, io) {
     socket.on(baseUrl + '/to-left', (data) => gunGame.toLeft(data))
     socket.on(baseUrl + '/to-right', (data) => gunGame.toRight(data))
     socket.on(baseUrl + '/gun', (data, callback) => gunGame.gun(data, callback))
-    socket.on(baseUrl + '/use-card', (data) => gunGame.useCard(data))
+    socket.on(baseUrl + '/use-card', (data, callback) => gunGame.useCard(data, callback))
+    socket.on(baseUrl + '/use-skill', (data, callback) => gunGame.useSkill(data, callback))
     socket.on(baseUrl + '/choose-velocity', (data, callback) =>
         gunGame.chooseVelocity(data, callback),
     )
@@ -76,6 +77,14 @@ class GunGame {
     // on: gun-game/to-left | emit: gun-game/update-location
     toLeft() {
         try {
+            const curMatch = this.socket.handshake.match
+            const phases = configGame.gunGame
+            const curTurn = curMatch.logs[curMatch.logs.length - 1]
+            if (curTurn.turner?.toString() !== this._id?.toString()) return
+            if (curTurn.turner !== this._id) return
+            if (curTurn.phase !== phases.standbyPhase.key && curTurn.phase !== phases.mainPhase.key)
+                return
+
             const playerData = this.socket.handshake.match.player
             const dataPOnMainGame = playerData.mainGame
             const objsMap = this.socket.handshake.match.objects
@@ -87,7 +96,7 @@ class GunGame {
                 dataPOnMainGame.characterGradient,
             )
 
-            console.log(playerShape)
+            // console.log(playerShape)
             const nearest = nearestNeighborPolygon(playerShape, objsMap)
             // console.log('\np1: ', nearest.bottom.p1, '\np2: ', nearest.bottom.p2, '\nfollow: ', nearest.bottom.follow)
             // console.log('Left: ', nearest.left, '\nfollow: ', nearest.bottom.follow)
@@ -112,7 +121,7 @@ class GunGame {
                 } else if ((isNearestX2Finite && isFollowInFinite) || nearestX2Valid) {
                     followLine.copy(nearestX2)
                 }
-                console.log('New follow line: ', followLine)
+                // console.log('New follow line: ', followLine)
             }
 
             if (!Number.isFinite(followLine.distance)) {
@@ -155,6 +164,13 @@ class GunGame {
 
     toRight() {
         try {
+            const curMatch = this.socket.handshake.match
+            const phases = configGame.gunGame
+            const curTurn = curMatch.logs[curMatch.logs.length - 1]
+            if (curTurn.turner?.toString() !== this._id?.toString()) return
+            if (curTurn.turner !== this._id) return
+            if (curTurn.phase !== phases.standbyPhase.key && curTurn.phase !== phases.mainPhase.key)
+                return
             const playerData = this.socket.handshake.match.player
             const dataPOnMainGame = playerData.mainGame
             const objsMap = this.socket.handshake.match.objects
@@ -166,7 +182,7 @@ class GunGame {
                 dataPOnMainGame.characterGradient,
             )
 
-            console.log(playerShape)
+            // console.log(playerShape)
             const nearest = nearestNeighborPolygon(playerShape, objsMap)
             // console.log('\np1: ', nearest.bottom.p1, '\np2: ', nearest.bottom.p2, '\nfollow: ', nearest.bottom.follow)
             // console.log('right: ', nearest.right, '\nfollow: ', nearest.bottom.follow)
@@ -235,18 +251,23 @@ class GunGame {
     // on: gun-game/gun | emit: gun-game/gun-status
     gun({ angle, velocity_0 }, callback) {
         try {
-            const curMatch = this.socket.handshake.match
+            const match = this.socket.handshake.match
             const phases = configGame.gunGame
-            const curTurn = curMatch.logs[curMatch.logs.length - 1]
+            const curTurn = match.logs[match.logs.length - 1]
+            console.log(curTurn.turner, this._id, curTurn.turner !== this._id)
+            if (curTurn.turner?.toString() !== this._id?.toString()) return
             if (curTurn.turner !== this._id) return
             if (curTurn.phase !== phases.mainPhase.key) return
+            curTurn.phase = phases.battlePhase.key
             // call callback handle of client
             callback()
 
             // #region handle gun
+            // #region handle collision
             const angleSign = angle > 0
             angle = 90 - angle
-            const windForce = 1.1
+            const windForce = curTurn.windForce
+            console.log('Start battle phase, wind force: ', windForce)
             const playersInfo = this.socket.handshake.match.players
             const player = this.socket.handshake.match.player
             const centerPlayer = new Point(
@@ -265,7 +286,7 @@ class GunGame {
                     dataMainGame.characterGradient,
                 )
                 shapes.push(data)
-                playersShapes.push(dataMainGame.shape)
+                playerShapes.push(dataMainGame.shape)
                 if (p._id.toString() === player.target._id) {
                     const center = new Line()
                         .init(dataMainGame.shape[3], dataMainGame.shape[0])
@@ -282,6 +303,7 @@ class GunGame {
             console.log(collision)
 
             const res = new GunRes([], [])
+            // #endregion handle collision
             // #region calculate when collision
             if (collision) {
                 collision.location.y = bullet.parabola.computeY(collision.location.x)
@@ -307,11 +329,12 @@ class GunGame {
             const locationsBullet = [bullet0]
 
             const callbackChangeLocationX = angleSign ? increaseX : decreaseX
-            for (let i = 0.5; i <= configGame.gunGame.battlePhase.value; i += 0.5) {
+            // console.log('bullet: ', bullet0.point.x, angleSign)
+            for (let i = 0.005; i <= configGame.gunGame.battlePhase.value; i += 0.005) {
                 const x = callbackChangeLocationX(
                     locationsBullet[locationsBullet.length - 1].point.x,
                 )
-                const bulletPoint = new Point(x, bullet.parabola.computeY(x))
+                const bulletPoint = new Point(x, -bullet.parabola.computeY(x))
                 const preBullet = locationsBullet[locationsBullet.length - 1].point
                 const lineXAndPreX = new Line().init(preBullet, bulletPoint)
                 const locationBullet = new BulletRes(bulletPoint, lineXAndPreX.calcAngle())
@@ -321,20 +344,31 @@ class GunGame {
             res.bullets = locationsBullet
             // #endregion calculate list bullet's location
 
-            console.log(res)
+            // console.log(res)
             // #endregion handle gun
 
             // start battle phase 15s
+            // console.log('Gun start')
             setTimeout(() => {
                 // calc damage
                 // <--code calc damage--------------------------------------->
             }, phases.battlePhase * 1000)
             // renew timeout to end phase
-            clearTimeout(curTurn.timeoutNextTurn)
+            curTurn.timeOutNextTurn.close()
             // The time to start next turn, t = battleTime + endTime
             const timeUntilEndPhase = (phases.battlePhase.value + phases.endPhase.value) * 1000
-            curTurn.timeoutNextTurn = setTimeout(startNewTurn, timeUntilEndPhase, this, curMatch)
-            return this.io.to(this.socket.handshake.idRoom).emit('gun-game/gun-status', res)
+            curTurn.timeOutNextTurn = setTimeout(
+                (_this, match) => {
+                    console.log('\nTimeout gun\n')
+                    startNewTurn(_this, match)
+                },
+                timeUntilEndPhase,
+                this,
+                match,
+            )
+
+            // console.log('Gun end')
+            return this.io.to(this.socket.handshake.idRoom).emit(this.baseUrl + '/gun-status', res)
         } catch (e) {
             console.log(e)
             return
@@ -359,12 +393,18 @@ class GunGame {
     }
 
     // on: gun-game/use-card | emit: gun-game/use-card/res
-    useCard({ cardId }) {
+    useCard({ cardId }, callback) {
         try {
             const match = this.socket.handshake.match
             const card = match.cards.find((c) => c._id === cardId)
             if (!card.isEnable || card.owner !== this._id) return
+            card.isEnable = false
 
+            // #region handle add card to list turn's cards
+            // <code>
+            // #endregion handle add card to list turn's cards
+
+            callback()
             return this.io.to(this.socket.handshake.idRoom).emit(this.baseUrl + '/use-card/res', {
                 _id: match._id,
                 card: card.data._id,
@@ -377,8 +417,22 @@ class GunGame {
     }
 
     // on: gun-game/use-skill | emit: gun-game/use-skill/res
-    useSkill({ skillId }) {
+    useSkill({ skillId }, callback) {
         try {
+            const match = this.socket.handshake.match
+            const phases = configGame.gunGame
+            const curTurn = match.logs[match.logs.length - 1]
+            if (curTurn.turner?.toString() !== this._id?.toString()) return
+            if (curTurn.turner !== this._id) return
+            if (curTurn.phase !== phases.mainPhase.key) return
+
+            const newSTA = 10
+            callback(newSTA)
+            return this.io.to(this.socket.handshake.idRoom).emit(this.baseUrl + '/use-skill/res', {
+                _id: match._id,
+                card: skillId,
+                owner: this._id,
+            })
         } catch (e) {
             console.log(e)
             return
@@ -391,17 +445,30 @@ class GunGame {
             // renew timeout, set timeout of main phase
             const match = this.socket.handshake.match
             const curTurn = match.logs[match.logs.length - 1]
-            if (curTurn.turner !== this._id) return
+            const id = this._id?.toString() || this._id
+            const curTurner = curTurn.turner?.toString() || curTurn.turner
+            if (curTurner !== id) return
             const phases = configGame.gunGame
+            console.log(
+                curTurn.phase,
+                phases.standbyPhase.key,
+                curTurn.phase !== phases.standbyPhase.key,
+            )
             if (curTurn.phase !== phases.standbyPhase.key) return
+            console.log('Start main phase')
             curTurn.phase = phases.mainPhase.key
-            clearTimeout(curTurn.timeoutNextTurn)
-            curTurn.timeoutNextTurn = setTimeout(
-                startNewTurn,
+            // match.logs.forEach((turn) => )
+            curTurn.timeOutNextTurn?.close()
+            curTurn.timeOutNextTurn = setTimeout(
+                (_this, match) => {
+                    console.log('\nTimeout velo\n')
+                    startNewTurn(_this, match)
+                },
                 phases.mainPhase.value * 1000,
                 this,
                 match,
             )
+            // console.log('velocity: ', curTurn.timeoutNextTurn)
             // call callback handle of client
             callback()
         } catch (e) {

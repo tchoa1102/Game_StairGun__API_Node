@@ -8,6 +8,7 @@ const RoomAddRes = require('./site/room/room.add.res')
 const configGame = require('../../gameConfig.json')
 
 const config = require('../../gameConfig.json')
+const Turn = require('./turn')
 
 const playersOnMatch = [
     {
@@ -153,296 +154,296 @@ const objects = [
             name: 'stone-1',
         },
     },
-    // {
-    //     location: {
-    //         x: 600,
-    //         y: -340,
-    //     },
-    //     data: {
-    //         _id: '65393b588921bd559f219760',
-    //         points: [
-    //             {
-    //                 x: 0,
-    //                 y: 8.36,
-    //             },
-    //             {
-    //                 x: 26.28,
-    //                 y: 0,
-    //             },
-    //             {
-    //                 x: 60.77,
-    //                 y: 0,
-    //             },
-    //             {
-    //                 x: 86.09,
-    //                 y: 12.06,
-    //             },
-    //             {
-    //                 x: 111.13,
-    //                 y: 30.36,
-    //             },
-    //             {
-    //                 x: 105.84,
-    //                 y: 78,
-    //             },
-    //             {
-    //                 x: 36.29,
-    //                 y: 78,
-    //             },
-    //             {
-    //                 x: 7.92,
-    //                 y: 54.32,
-    //             },
-    //         ],
-    //         canBeDestroyed: false,
-    //         src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/gunGame/objects/stone-2.png',
-    //         name: 'stone-2',
-    //     },
-    // },
-    // {
-    //     location: {
-    //         x: 70,
-    //         y: -400,
-    //     },
-    //     data: {
-    //         _id: '65386e998921bd559f21975e',
-    //         points: [
-    //             {
-    //                 x: 0,
-    //                 y: 11.94,
-    //             },
-    //             {
-    //                 x: 8.49,
-    //                 y: 9.52,
-    //             },
-    //             {
-    //                 x: 9.93,
-    //                 y: 6.13,
-    //             },
-    //             {
-    //                 x: 11.53,
-    //                 y: 5.32,
-    //             },
-    //             {
-    //                 x: 12.97,
-    //                 y: 5.16,
-    //             },
-    //             {
-    //                 x: 12.05,
-    //                 y: 3.06,
-    //             },
-    //             {
-    //                 x: 13.45,
-    //                 y: 1.13,
-    //             },
-    //             {
-    //                 x: 21.94,
-    //                 y: 1.13,
-    //             },
-    //             {
-    //                 x: 22.74,
-    //                 y: 0,
-    //             },
-    //             {
-    //                 x: 27.54,
-    //                 y: 0.65,
-    //             },
-    //             {
-    //                 x: 28.98,
-    //                 y: 2.1,
-    //             },
-    //             {
-    //                 x: 29.3,
-    //                 y: 0.32,
-    //             },
-    //             {
-    //                 x: 30.91,
-    //                 y: 0.1,
-    //             },
-    //             {
-    //                 x: 32.67,
-    //                 y: 0,
-    //             },
-    //             {
-    //                 x: 32.99,
-    //                 y: 0.05,
-    //             },
-    //             {
-    //                 x: 32.83,
-    //                 y: 3.23,
-    //             },
-    //             {
-    //                 x: 34.91,
-    //                 y: 3.55,
-    //             },
-    //             {
-    //                 x: 36.67,
-    //                 y: 4.35,
-    //             },
-    //             {
-    //                 x: 37.95,
-    //                 y: 5.89,
-    //             },
-    //             {
-    //                 x: 39.23,
-    //                 y: 7.42,
-    //             },
-    //             {
-    //                 x: 40.03,
-    //                 y: 9.52,
-    //             },
-    //             {
-    //                 x: 49,
-    //                 y: 10.48,
-    //             },
-    //             {
-    //                 x: 48.2,
-    //                 y: 40.97,
-    //             },
-    //             {
-    //                 x: 29.14,
-    //                 y: 50,
-    //             },
-    //             {
-    //                 x: 1.44,
-    //                 y: 43.55,
-    //             },
-    //             {
-    //                 x: 1.44,
-    //                 y: 21.94,
-    //             },
-    //             {
-    //                 x: 0,
-    //                 y: 21.94,
-    //             },
-    //         ],
-    //         canBeDestroyed: true,
-    //         src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1698299614/StairGunGame/gunGame/objects/box-size-49x50.png',
-    //         name: 'gift-box',
-    //     },
-    // },
-    // {
-    //     location: {
-    //         x: 280,
-    //         y: -380,
-    //     },
-    //     data: {
-    //         _id: '65386e998921bd559f21975e',
-    //         points: [
-    //             {
-    //                 x: 0,
-    //                 y: 11.94,
-    //             },
-    //             {
-    //                 x: 8.49,
-    //                 y: 9.52,
-    //             },
-    //             {
-    //                 x: 9.93,
-    //                 y: 6.13,
-    //             },
-    //             {
-    //                 x: 11.53,
-    //                 y: 5.32,
-    //             },
-    //             {
-    //                 x: 12.97,
-    //                 y: 5.16,
-    //             },
-    //             {
-    //                 x: 12.05,
-    //                 y: 3.06,
-    //             },
-    //             {
-    //                 x: 13.45,
-    //                 y: 1.13,
-    //             },
-    //             {
-    //                 x: 21.94,
-    //                 y: 1.13,
-    //             },
-    //             {
-    //                 x: 22.74,
-    //                 y: 0,
-    //             },
-    //             {
-    //                 x: 27.54,
-    //                 y: 0.65,
-    //             },
-    //             {
-    //                 x: 28.98,
-    //                 y: 2.1,
-    //             },
-    //             {
-    //                 x: 29.3,
-    //                 y: 0.32,
-    //             },
-    //             {
-    //                 x: 30.91,
-    //                 y: 0.1,
-    //             },
-    //             {
-    //                 x: 32.67,
-    //                 y: 0,
-    //             },
-    //             {
-    //                 x: 32.99,
-    //                 y: 0.05,
-    //             },
-    //             {
-    //                 x: 32.83,
-    //                 y: 3.23,
-    //             },
-    //             {
-    //                 x: 34.91,
-    //                 y: 3.55,
-    //             },
-    //             {
-    //                 x: 36.67,
-    //                 y: 4.35,
-    //             },
-    //             {
-    //                 x: 37.95,
-    //                 y: 5.89,
-    //             },
-    //             {
-    //                 x: 39.23,
-    //                 y: 7.42,
-    //             },
-    //             {
-    //                 x: 40.03,
-    //                 y: 9.52,
-    //             },
-    //             {
-    //                 x: 49,
-    //                 y: 10.48,
-    //             },
-    //             {
-    //                 x: 48.2,
-    //                 y: 40.97,
-    //             },
-    //             {
-    //                 x: 29.14,
-    //                 y: 50,
-    //             },
-    //             {
-    //                 x: 1.44,
-    //                 y: 43.55,
-    //             },
-    //             {
-    //                 x: 1.44,
-    //                 y: 21.94,
-    //             },
-    //             {
-    //                 x: 0,
-    //                 y: 21.94,
-    //             },
-    //         ],
-    //         canBeDestroyed: true,
-    //         src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1698299614/StairGunGame/gunGame/objects/box-size-49x50.png',
-    //         name: 'gift-box',
-    //     },
-    // },
+    {
+        location: {
+            x: 600,
+            y: -340,
+        },
+        data: {
+            _id: '65393b588921bd559f219760',
+            points: [
+                {
+                    x: 0,
+                    y: 8.36,
+                },
+                {
+                    x: 26.28,
+                    y: 0,
+                },
+                {
+                    x: 60.77,
+                    y: 0,
+                },
+                {
+                    x: 86.09,
+                    y: 12.06,
+                },
+                {
+                    x: 111.13,
+                    y: 30.36,
+                },
+                {
+                    x: 105.84,
+                    y: 78,
+                },
+                {
+                    x: 36.29,
+                    y: 78,
+                },
+                {
+                    x: 7.92,
+                    y: 54.32,
+                },
+            ],
+            canBeDestroyed: false,
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/gunGame/objects/stone-2.png',
+            name: 'stone-2',
+        },
+    },
+    {
+        location: {
+            x: 70,
+            y: -400,
+        },
+        data: {
+            _id: '65386e998921bd559f21975e',
+            points: [
+                {
+                    x: 0,
+                    y: 11.94,
+                },
+                {
+                    x: 8.49,
+                    y: 9.52,
+                },
+                {
+                    x: 9.93,
+                    y: 6.13,
+                },
+                {
+                    x: 11.53,
+                    y: 5.32,
+                },
+                {
+                    x: 12.97,
+                    y: 5.16,
+                },
+                {
+                    x: 12.05,
+                    y: 3.06,
+                },
+                {
+                    x: 13.45,
+                    y: 1.13,
+                },
+                {
+                    x: 21.94,
+                    y: 1.13,
+                },
+                {
+                    x: 22.74,
+                    y: 0,
+                },
+                {
+                    x: 27.54,
+                    y: 0.65,
+                },
+                {
+                    x: 28.98,
+                    y: 2.1,
+                },
+                {
+                    x: 29.3,
+                    y: 0.32,
+                },
+                {
+                    x: 30.91,
+                    y: 0.1,
+                },
+                {
+                    x: 32.67,
+                    y: 0,
+                },
+                {
+                    x: 32.99,
+                    y: 0.05,
+                },
+                {
+                    x: 32.83,
+                    y: 3.23,
+                },
+                {
+                    x: 34.91,
+                    y: 3.55,
+                },
+                {
+                    x: 36.67,
+                    y: 4.35,
+                },
+                {
+                    x: 37.95,
+                    y: 5.89,
+                },
+                {
+                    x: 39.23,
+                    y: 7.42,
+                },
+                {
+                    x: 40.03,
+                    y: 9.52,
+                },
+                {
+                    x: 49,
+                    y: 10.48,
+                },
+                {
+                    x: 48.2,
+                    y: 40.97,
+                },
+                {
+                    x: 29.14,
+                    y: 50,
+                },
+                {
+                    x: 1.44,
+                    y: 43.55,
+                },
+                {
+                    x: 1.44,
+                    y: 21.94,
+                },
+                {
+                    x: 0,
+                    y: 21.94,
+                },
+            ],
+            canBeDestroyed: true,
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1698299614/StairGunGame/gunGame/objects/box-size-49x50.png',
+            name: 'gift-box',
+        },
+    },
+    {
+        location: {
+            x: 280,
+            y: -380,
+        },
+        data: {
+            _id: '65386e998921bd559f21975e',
+            points: [
+                {
+                    x: 0,
+                    y: 11.94,
+                },
+                {
+                    x: 8.49,
+                    y: 9.52,
+                },
+                {
+                    x: 9.93,
+                    y: 6.13,
+                },
+                {
+                    x: 11.53,
+                    y: 5.32,
+                },
+                {
+                    x: 12.97,
+                    y: 5.16,
+                },
+                {
+                    x: 12.05,
+                    y: 3.06,
+                },
+                {
+                    x: 13.45,
+                    y: 1.13,
+                },
+                {
+                    x: 21.94,
+                    y: 1.13,
+                },
+                {
+                    x: 22.74,
+                    y: 0,
+                },
+                {
+                    x: 27.54,
+                    y: 0.65,
+                },
+                {
+                    x: 28.98,
+                    y: 2.1,
+                },
+                {
+                    x: 29.3,
+                    y: 0.32,
+                },
+                {
+                    x: 30.91,
+                    y: 0.1,
+                },
+                {
+                    x: 32.67,
+                    y: 0,
+                },
+                {
+                    x: 32.99,
+                    y: 0.05,
+                },
+                {
+                    x: 32.83,
+                    y: 3.23,
+                },
+                {
+                    x: 34.91,
+                    y: 3.55,
+                },
+                {
+                    x: 36.67,
+                    y: 4.35,
+                },
+                {
+                    x: 37.95,
+                    y: 5.89,
+                },
+                {
+                    x: 39.23,
+                    y: 7.42,
+                },
+                {
+                    x: 40.03,
+                    y: 9.52,
+                },
+                {
+                    x: 49,
+                    y: 10.48,
+                },
+                {
+                    x: 48.2,
+                    y: 40.97,
+                },
+                {
+                    x: 29.14,
+                    y: 50,
+                },
+                {
+                    x: 1.44,
+                    y: 43.55,
+                },
+                {
+                    x: 1.44,
+                    y: 21.94,
+                },
+                {
+                    x: 0,
+                    y: 21.94,
+                },
+            ],
+            canBeDestroyed: true,
+            src: 'https://res.cloudinary.com/dyhfvkzag/image/upload/v1698299614/StairGunGame/gunGame/objects/box-size-49x50.png',
+            name: 'gift-box',
+        },
+    },
 ]
 const cards = [
     {
@@ -1450,13 +1451,16 @@ const stairs = [
     },
 ]
 
-const turnConfig = {
-    id: 1,
-    timeoutNextTurn: 0, // id timeout
-    turner: '115421543287322673156111',
-    phase: configGame.gunGame.standbyPhase.key,
-    cards: [],
-}
+const t = setTimeout(() => console.log('Start new turn'), 1)
+const turnConfig = new Turn(0, t, '115421543287322673156111')
+// {
+//     id: 1,
+//     timeoutNextTurn: t, // id timeout
+//     windForce: 1.1,
+//     turner: '115421543287322673156111',
+//     phase: configGame.gunGame.standbyPhase.key,
+//     cards: [],
+// }
 const logsPub = [turnConfig]
 // #endregion config card and stair
 
@@ -1466,22 +1470,21 @@ module.exports = function (io) {
         // console.log(socket)
 
         // #region test env => can xoa
-        socket.handshake.idRoom = '1'
+        // socket.handshake.idRoom = '1'
         socket.join(socket.handshake.idRoom)
-        socket.handshake.match = {
-            _id: '6528fb7d960eecd821e4040d',
-            turn: turnConfig,
-            stairs: stairs,
-            logs: logsPub,
-            cards: cards,
-            timeStart: '2023-10-13T08:10:37.875Z',
-            windForce: 1.1,
-            players: playersOnMatch,
-            player: playerData,
-            objects,
-            eventStateSpecial: undefined,
-            endEventTime: Math.abs(new Date() - new Date(0)),
-        }
+        // socket.handshake.match = {
+        //     _id: '6528fb7d960eecd821e4040d',
+        //     stairs: stairs,
+        //     logs: logsPub,
+        //     cards: cards,
+        //     timeStart: '2023-10-13T08:10:37.875Z',
+        //     windForce: 1.1,
+        //     players: playersOnMatch,
+        //     player: playerData,
+        //     objects,
+        //     eventStateSpecial: undefined,
+        //     endEventTime: Math.abs(new Date() - new Date(0)),
+        // }
         // #endregion test env => can xoa
 
         console.log('idPlayer: ', socket.handshake.idPlayer)

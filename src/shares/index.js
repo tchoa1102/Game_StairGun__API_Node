@@ -4,6 +4,7 @@ const math = require('mathjs')
 const configGame = require('../gameConfig.json')
 const Turn = require('../routes/socket.io/turn')
 const { stairSchema } = require('../app/schemas')
+const { UserModel } = require('../app/models')
 require('nerdamer/Algebra')
 require('nerdamer/Calculus')
 require('nerdamer/Solve')
@@ -120,24 +121,224 @@ function createCards(stairs) {
 
 function startNewTurn(_this, match) {
     console.log('\n-----------------------')
-    console.log('End this turn, start new turn!')
+    console.log('End this turn, start new turn!, ')
     console.log('-----------------------')
-    // <--code choose next player on new turn-------------------->
-    const curTurn = match.logs[match.logs.length - 1]
+    // #region compute before end turn
+    // #region status reborn
+    const updateStatuses = {}
+    updateStatuses.target = match.player.target._id
+    const basePlayer = match.players.find((p) => p._id === match.player.target._id)
+    match.player.mainGame.STA = basePlayer.STA
+    updateStatuses.STA = basePlayer.STA
+    // #endregion status reborn
     const phases = configGame.gunGame
+    const curTurn = match.logs[match.logs.length - 1]
     curTurn.phase = phases.endPhase.key
+
+    // #region gift
+    const { teamA, teamB } = match.players.reduce(
+        (acc, player) => {
+            const p = _this.io.sockets.sockets.get(player.socketId)
+            // console.log(player.socketId)
+            if (p) {
+                // bug: player go out isn't computed
+                if (p.handshake.match.player.position < 3) {
+                    if (p.handshake.match.player.mainGame.HP > 0) {
+                        acc.teamA.canPlay.push(player)
+                    }
+                    acc.teamA.onRoom.push(player)
+                }
+                if (p.handshake.match.player.position >= 3) {
+                    if (p.handshake.match.player.mainGame.HP > 0) {
+                        acc.teamB.canPlay.push(player)
+                    }
+                    acc.teamB.onRoom.push(player)
+                }
+            }
+            return acc
+        },
+        {
+            teamA: {
+                onRoom: [],
+                canPlay: [],
+            },
+            teamB: {
+                onRoom: [],
+                canPlay: [],
+            },
+        },
+    )
+    // console.log(teamA, teamB)
+    if ((teamA.onRoom.length === 0 || teamA.canPlay.length === 0) && teamB.onRoom.length !== 0) {
+        const statuses = {
+            AGI: 0,
+            ATK: 0,
+            DEF: 0,
+            HP: 0,
+            LUK: 0,
+            STA: 0,
+        }
+        teamA.onRoom.forEach((p) => {
+            statuses.AGI += p.AGI / 2
+            p.AGI /= 2
+            statuses.ATK += p.ATK / 2
+            p.ATK /= 2
+            statuses.DEF += p.DEF / 2
+            p.DEF /= 2
+            statuses.HP += p.HP / 2
+            p.HP /= 2
+            statuses.LUK += p.LUK / 2
+            p.LUK /= 2
+            statuses.STA += p.STA / 2
+            p.STA /= 2
+            UserModel.updateOne(
+                { _id: p._id },
+                {
+                    level: p.level - 1 < 0 ? 0 : p.level - 1,
+                    AGI: p.AGI,
+                    ATK: p.ATK,
+                    DEF: p.DEF,
+                    HP: p.HP,
+                    LUK: p.LUK,
+                    STA: p.STA,
+                },
+            )
+                .then((result) => console.log('Update success'))
+                .catch((err) => console.log(err))
+        })
+
+        for (const key in statuses) {
+            if (Object.hasOwnProperty.call(statuses, key)) {
+                const element = statuses[key]
+                statuses[key] = Math.floor(element / teamA.onRoom.length)
+            }
+        }
+
+        teamB.onRoom.forEach((p) => {
+            UserModel.updateOne(
+                { _id: p._id },
+                {
+                    level: p.level + 1,
+                    AGI: statuses.AGI,
+                    ATK: statuses.ATK,
+                    DEF: statuses.DEF,
+                    HP: statuses.HP,
+                    LUK: statuses.LUK,
+                    STA: statuses.STA,
+                },
+            )
+                .then((result) => console.log('Update success'))
+                .catch((err) => console.log(err))
+        })
+
+        return _this.io.to(_this.socket.handshake.idRoom).emit(_this.baseUrl + '/game-end', {
+            winner: 'teamB',
+            statuses,
+        })
+    } else if (
+        teamA.onRoom.length !== 0 &&
+        (teamB.onRoom.length === 0 || teamB.canPlay.length === 0)
+    ) {
+        const statuses = {
+            AGI: 0,
+            ATK: 0,
+            DEF: 0,
+            HP: 0,
+            LUK: 0,
+            STA: 0,
+        }
+        teamB.onRoom.forEach((p) => {
+            statuses.AGI += p.AGI / 2
+            p.AGI /= 2
+            statuses.ATK += p.ATK / 2
+            p.ATK /= 2
+            statuses.DEF += p.DEF / 2
+            p.DEF /= 2
+            statuses.HP += p.HP / 2
+            p.HP /= 2
+            statuses.LUK += p.LUK / 2
+            p.LUK /= 2
+            statuses.STA += p.STA / 2
+            p.STA /= 2
+            UserModel.updateOne(
+                { _id: p._id },
+                {
+                    level: p.level - 1 < 0 ? 0 : p.level - 1,
+                    AGI: p.AGI,
+                    ATK: p.ATK,
+                    DEF: p.DEF,
+                    HP: p.HP,
+                    LUK: p.LUK,
+                    STA: p.STA,
+                },
+            )
+                .then((result) => console.log('Update success'))
+                .catch((err) => console.log(err))
+        })
+
+        for (const key in statuses) {
+            if (Object.hasOwnProperty.call(statuses, key)) {
+                const element = statuses[key]
+                element = Math.floor(element / teamA.onRoom.length)
+            }
+        }
+
+        teamA.onRoom.forEach((p) => {
+            UserModel.updateOne(
+                { _id: p._id },
+                {
+                    level: p.level + 1,
+                    AGI: statuses.AGI,
+                    ATK: statuses.ATK,
+                    DEF: statuses.DEF,
+                    HP: statuses.HP,
+                    LUK: statuses.LUK,
+                    STA: statuses.STA,
+                },
+            )
+                .then((result) => console.log('Update success'))
+                .catch((err) => console.log(err))
+        })
+        return _this.io.to(_this.socket.handshake.idRoom).emit(_this.baseUrl + '/game-end', {
+            winner: 'teamA',
+            statuses,
+        })
+    } else if (teamA.onRoom.length === 0 && teamBonRoom.length === 0) {
+        return console.log('No player')
+    }
+    // #endregion gift
+    // #region <--code choose next player on new turn-------------------->
+    const teamOnNewTurn = !teamA.onRoom.find((p) => p._id === curTurn.turner) ? teamA : teamB
+    const indexNewTurner = Math.floor(Math.random() * teamOnNewTurn.onRoom.length)
+    // console.log(teamOnNewTurn, teamA, teamB, indexNewTurner, teamOnNewTurn.onRoom[indexNewTurner])
+    const newTurner = teamOnNewTurn.onRoom[indexNewTurner]._id
+    // console.log('Turner: ', newTurner)
+    // #endregion <--code choose next player on new turn-------------------->
+    // #endregion compute before end turn
+    // #region config new turn
     const timeOutStartNewTurn = setTimeout(
-        startNewTurn,
+        (_this, match) => {
+            console.log(
+                '\nTimeout next turn, ',
+                match.logs.length,
+                match.logs[match.logs.length - 1].id,
+                '\n',
+            )
+            startNewTurn(_this, match)
+        },
         phases.standbyPhase.value * 1000,
         _this,
         match,
     )
-    const newTurn = new Turn(match.logs.length, timeOutStartNewTurn, _this._id)
+    const newTurn = new Turn(match.logs.length, timeOutStartNewTurn, newTurner)
     match.logs.push(newTurn)
-    _this.io.to(_this.socket.handshake.idRoom).emit(_this.baseUrl + '/change-turn/res', {
+    const res = {
         _id: match._id,
-        turner: _this._id,
-    })
+        updateStatuses: [updateStatuses],
+        ...newTurn.res(),
+    }
+    return _this.io.to(_this.socket.handshake.idRoom).emit(_this.baseUrl + '/change-turn/res', res)
+    // #endregion config new turn
 }
 
 module.exports = {

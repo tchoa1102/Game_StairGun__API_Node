@@ -7,10 +7,16 @@ const MapModel = new mongoose.Schema({
     objects: [
         {
             location: {
-                x: { type: String, required: true },
-                y: { type: String, required: true },
+                x: { type: Number, required: true },
+                y: { type: Number, required: true },
             },
             data: { type: mongoose.Types.ObjectId, ref: 'objects', required: true },
+        },
+    ],
+    playersLocations: [
+        {
+            x: { type: Number, required: true },
+            y: { type: Number, required: true },
         },
     ],
     backgroundGunGame: {

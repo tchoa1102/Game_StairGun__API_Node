@@ -12,9 +12,10 @@ const RoomPlayerRemoveRes = require('./room.player.remove.res')
 const RoomRes = require('./room.res')
 const config = require('../../../../gameConfig.json')
 
-const { createStairs } = require('../../../../shares')
+const { createStairs, startNewTurn } = require('../../../../shares')
 const MatchRes = require('../match/match.res')
 const cardController = require('../../../../app/controllers/card.controller')
+const Turn = require('../../turn')
 
 class room {
     // #region again
@@ -145,12 +146,15 @@ class room {
                         if (p.isOnRoom) {
                             const dataPlayer = await UserModel.findById(p.player).lean()
                             const indexStair = Math.floor(Math.random() * listStair.length)
+                            const indexLocationOnMap = Math.floor(
+                                Math.random() * map.playersLocations.length,
+                            )
                             const player = {
                                 match: newMatch._id,
                                 target: dataPlayer,
                                 position: p.position,
                                 mainGame: {
-                                    bottomLeft: { x: 100, y: 400 },
+                                    bottomLeft: map.playersLocations[indexLocationOnMap],
                                     characterAngle: 90,
                                     HP: Number.parseFloat(dataPlayer.HP),
                                     STA: Number.parseFloat(dataPlayer.STA),
@@ -178,11 +182,45 @@ class room {
                         }
                     }
                     // #endregion convert players
+                    const turner = players[0].target._id
+                    const matchConfig = {
+                        match: newMatch._id,
+                        map: map._id,
+
+                        logs: [],
+                        stairs: listStair,
+                        cards: cardsData.cardsDetail,
+                        timeStart: timeStart,
+                        players: players.map((p) => p.target),
+                        player: players[0],
+                        objects: map.objects,
+                        endEventTime: Math.abs(new Date() - new Date(0)),
+                    }
+                    const t = setTimeout(
+                        (_this, match) => {
+                            console.log('\nTimeout begin\n')
+                            startNewTurn(_this, match)
+                        },
+                        20000,
+                        {
+                            io,
+                            socket,
+                            _id: turner,
+                            baseUrl: 'gun-game',
+                            handshake: {
+                                idRoom: idRoom,
+                            },
+                        },
+                        matchConfig,
+                    )
+                    const turnConfig = new Turn(0, t, turner)
+                    matchConfig.logs.push(turnConfig)
                     players.forEach((player) => {
                         const dataSaveSocket = {
                             match: newMatch._id,
                             map: map._id,
 
+                            logs: [turnConfig],
                             stairs: listStair,
                             cards: cardsData.cardsDetail,
                             timeStart: timeStart,
@@ -192,8 +230,9 @@ class room {
                             eventState: undefined,
                             endEventTime: Math.abs(new Date() - new Date(0)),
                         }
-                        io.sockets.sockets.get(player.target.socketId).handshake.match = dataSaveSocket
-                        console.log('data day: ', socket.handshake.match.player)
+                        io.sockets.sockets.get(player.target.socketId).handshake.match =
+                            dataSaveSocket
+                        // console.log('data day: ', socket.handshake.match.player)
                     })
 
                     await newMatch.save()
@@ -214,6 +253,8 @@ class room {
                         map.objects,
                         map.backgroundGunGame,
                     )
+                    dataRes.turner = turner
+                    dataRes.windForce = turnConfig.windForce
                     // console.log(dataRes)
                     return io.to(idRoom).emit('matches/create/res', {
                         data: dataRes,
