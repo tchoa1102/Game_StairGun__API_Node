@@ -1,0 +1,44 @@
+{
+    "name": "stairgungame__api_node",
+    "version": "1.0.0",
+    "description": "Project for web-game, use NodeJS, Vue, Phaser, SocketIO, etc",
+    "main": "src/index.ts",
+    "scripts": {
+        "start": "nodemon src/index.ts",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/TKOGNISHU/StairGunGame__API_Node.git"
+    },
+    "keywords": [
+        "node",
+        "nodejs",
+        "express",
+        "socket.io"
+    ],
+    "author": "Tran Chi Hoa",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/TKOGNISHU/StairGunGame__API_Node/issues"
+    },
+    "homepage": "https://github.com/TKOGNISHU/StairGunGame__API_Node#readme",
+    "devDependencies": {
+        "@types/morgan": "^1.9.9",
+        "morgan": "^1.10.0",
+        "nodemon": "^3.0.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^4.18.2",
+        "firebase": "^10.4.0",
+        "firebase-admin": "^11.10.1",
+        "mathjs": "^11.11.2",
+        "mongoose": "^7.5.0",
+        "nerdamer": "^1.1.13",
+        "socket.io": "^4.7.2"
+    }
+}

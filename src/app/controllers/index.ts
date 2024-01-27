@@ -1,0 +1,6 @@
+export { default as StairGameController } from './stairGame.controller'
+export { default as MatchController } from './match.controller'
+export { default as AuthController } from './auth.controller'
+export { default as RoomController } from './room.controller'
+export { default as CardController } from './card.controller'
+export { default as ItemController } from './item.controller'
