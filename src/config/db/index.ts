@@ -1,16 +1,14 @@
 import mongoose from 'mongoose'
 
-main()
-    .then(() => console.log('Successfully connect!'))
-    .catch(() => console.log('Failed to connect'))
-
-async function main() {
-    try {
-        console.log('Connect string mongo: ' + process.env.MONGO_URL)
-        await mongoose.connect(process.env.MONGO_URL!)
-    } catch (e) {
-        console.log(e)
-    }
+async function main(): Promise<any> {
+    console.log('[...] Connect string mongo: ' + process.env.MONGO_URL)
+    return mongoose
+        .connect(process.env.MONGO_URL!)
+        .then(() => console.log('[COMPLETED] Successfully connect!'))
+        .catch((e) => {
+            console.log(e)
+            throw '[FAILED] Failed to connect'
+        })
 }
 
 export default { connect: main }

@@ -8,9 +8,9 @@ import cors from 'cors'
 // Import dotenv
 const keyPath = path.join(__dirname, '../.env')
 if (fs.existsSync(keyPath)) {
-    console.log('dotenv is exists!')
+    console.log('[SYS] dotenv is exists!')
     require(keyPath)
-    console.log('Imported env file')
+    console.log('[SYS] Imported env file')
 }
 
 import config from './config/server'
@@ -21,6 +21,7 @@ import { createServer } from 'http'
 import configGame from './gameConfig.json'
 import middlewares from './middlewares'
 
+// #region Server configuration
 const optionCORS: cors.CorsOptions = {
     origin(requestOrigin, callback) {
         const origins: string = process.env.ALLOWED_ORIGINS || ''
@@ -37,14 +38,16 @@ const server = createServer(app)
 const io = new Server(server, {
     cors: optionCORS,
 })
+// #endregion Server configuration
 
-// middleware
+// #region middleware
 app.use(cors(optionCORS))
 app.use(morgan('combined'))
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+// #endregion middleware
 
-// Routes
+// #region Routes
 app.use((req: any, res: any, next: any) => {
     console.log(
         `\x1b${configGame.colors.bg.green}%s\x1b${configGame.colors.reset}`,
@@ -69,14 +72,19 @@ app.use((error: any, req: any, res: any, next: any) => {
         message: 'Có lỗi xảy ra!',
     })
 })
+// #endregion Routes
 
 // start
 async function mainFlow(): Promise<void> {
-    await db.connect()
-    console.log(config.port)
-    server.listen(config.port, () => {
-        console.log('Listening on port ' + config.port + '\nWelcome to game!')
-    })
+    console.log('[CONF] Config port: ', config.port, '')
+    try {
+        await db.connect()
+        server.listen(config.port, () => {
+            console.log('[SYS] Listening on port ' + config.port + '\n[SYS] Welcome to game!\n')
+        })
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 mainFlow()

@@ -3,6 +3,7 @@ import { UserModel, FriendModel } from '../models'
 class AuthController {
     // [GET] /api/auth/load
     async load(req: any, res: any, next: any) {
+        console.log('Loading user...')
         const dataUser: any = req.user
         const id: string = dataUser.firebase.identities['google.com']
 
