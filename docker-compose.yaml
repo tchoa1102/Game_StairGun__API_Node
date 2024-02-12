@@ -1,0 +1,23 @@
+name: game_stairgun
+services:
+  server:
+    image: kyuseishu/game_stairgun
+    container_name: ${name}server
+    ports:
+      - 4000:4000
+    build:
+      dockerfile: dockerfile
+  mongodb:
+    image: mongo:6
+    container_name: ${nama}mongodb
+    ports:
+      - 27017:27017
+    volumes:
+      - stairgun_game:/data/db
+
+volumes:
+  stairgun_game:
+
+networks:
+  default:
+    driver: game_stairgun
