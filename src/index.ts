@@ -4,14 +4,17 @@ import express from 'express'
 import morgan from 'morgan'
 import { Server } from 'socket.io'
 import cors from 'cors'
+import dotenv from 'dotenv'
 
 // Import dotenv
-const keyPath = path.join(__dirname, '../.env')
-if (fs.existsSync(keyPath)) {
-    console.log('[SYS] dotenv is exists!')
-    require(keyPath)
-    console.log('[SYS] Imported env file')
-}
+dotenv.config()
+
+// const keyPath = path.resolve(process.cwd(), '.env')
+// if (fs.existsSync(keyPath)) {
+//     console.log('[SYS] dotenv is exists!')
+//     require(keyPath)
+//     console.log('[SYS] Imported env file')
+// }
 
 import config from './config/server'
 import router from './routes/http-https'
@@ -83,7 +86,7 @@ async function mainFlow(): Promise<void> {
             console.log('[SYS] Listening on port ' + config.port + '\n[SYS] Welcome to game!\n')
         })
     } catch (error) {
-        console.log(error)
+        console.log('An error correct: ', error)
     }
 }
 

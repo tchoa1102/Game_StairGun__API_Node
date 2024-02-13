@@ -105,7 +105,11 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
-    "outDir": "./dist"
+    "outDir": "./dist",
+    
+  },
+  "buildOptions": {
+    "force": true
   },
   "include": ["./package.json", "./package-lock.json", "src/**/*.ts", "src/**/*.json"],
   "exclude": ["node_modules"]

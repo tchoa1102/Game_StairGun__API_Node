@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const admin = require('firebase-admin');
 const serviceAccount = {
     type: process.env.FIREBASE_TYPE,
@@ -16,4 +17,4 @@ const serviceAccount = {
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
 });
-module.exports = admin;
+exports.default = admin;

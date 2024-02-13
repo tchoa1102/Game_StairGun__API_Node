@@ -13,18 +13,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-main()
-    .then(() => console.log('Successfully connect!'))
-    .catch(() => console.log('Failed to connect'));
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            console.log('Connect string mongo: ' + process.env.MONGO_URL);
-            yield mongoose_1.default.connect(process.env.MONGO_URL);
-        }
-        catch (e) {
+        const URL = 'MONGO_URL' + (process.env.IS_PRODUCTION || '');
+        console.log('[...] Connect string mongo: ' + URL);
+        return mongoose_1.default
+            .connect(process.env[URL])
+            .then(() => console.log('[COMPLETED] Successfully connect!'))
+            .catch((e) => {
             console.log(e);
-        }
+            throw '[FAILED] Failed to connect';
+        });
     });
 }
 exports.default = { connect: main };

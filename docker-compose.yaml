@@ -7,17 +7,26 @@ services:
       - 4000:4000
     build:
       dockerfile: dockerfile
+    env_file:
+      - .env
+    environment:
+      - IS_PRODUCTION=_DB
+      - MONGO_URL_DB=mongodb://mongodb:27017/stair_gun_game_dev
+    networks:
+      - game_stairgun
   mongodb:
     image: mongo:6
-    container_name: ${nama}mongodb
+    container_name: ${name}mongodb
     ports:
       - 27017:27017
     volumes:
       - stairgun_game:/data/db
+    networks:
+      - game_stairgun
 
 volumes:
   stairgun_game:
 
 networks:
-  default:
-    driver: game_stairgun
+  game_stairgun:
+    driver: bridge

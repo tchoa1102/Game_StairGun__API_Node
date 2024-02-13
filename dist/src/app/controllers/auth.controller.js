@@ -14,6 +14,7 @@ class AuthController {
     // [GET] /api/auth/load
     load(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('Loading user...');
             const dataUser = req.user;
             const id = dataUser.firebase.identities['google.com'];
             const user = yield models_1.UserModel.findById(id).populate('bag.data').lean();

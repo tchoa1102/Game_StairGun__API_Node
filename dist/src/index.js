@@ -12,19 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
 const express_1 = __importDefault(require("express"));
 const morgan_1 = __importDefault(require("morgan"));
 const socket_io_1 = require("socket.io");
 const cors_1 = __importDefault(require("cors"));
+const dotenv_1 = __importDefault(require("dotenv"));
 // Import dotenv
-const keyPath = path_1.default.join(__dirname, '../.env');
-if (fs_1.default.existsSync(keyPath)) {
-    console.log('dotenv is exists!');
-    require(keyPath);
-    console.log('Imported env file');
-}
+dotenv_1.default.config();
+// const keyPath = path.resolve(process.cwd(), '.env')
+// if (fs.existsSync(keyPath)) {
+//     console.log('[SYS] dotenv is exists!')
+//     require(keyPath)
+//     console.log('[SYS] Imported env file')
+// }
 const server_1 = __importDefault(require("./config/server"));
 const http_https_1 = __importDefault(require("./routes/http-https"));
 const socket_io_2 = __importDefault(require("./routes/socket.io"));
@@ -32,6 +32,7 @@ const db_1 = __importDefault(require("./config/db"));
 const http_1 = require("http");
 const gameConfig_json_1 = __importDefault(require("./gameConfig.json"));
 const middlewares_1 = __importDefault(require("./middlewares"));
+// #region Server configuration
 const optionCORS = {
     origin(requestOrigin, callback) {
         const origins = process.env.ALLOWED_ORIGINS || '';
@@ -49,12 +50,14 @@ const server = (0, http_1.createServer)(app);
 const io = new socket_io_1.Server(server, {
     cors: optionCORS,
 });
-// middleware
+// #endregion Server configuration
+// #region middleware
 app.use((0, cors_1.default)(optionCORS));
 app.use((0, morgan_1.default)('combined'));
 app.use(express_1.default.json()); // for parsing application/json
 app.use(express_1.default.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-// Routes
+// #endregion middleware
+// #region Routes
 app.use((req, res, next) => {
     console.log(`\x1b${gameConfig_json_1.default.colors.bg.green}%s\x1b${gameConfig_json_1.default.colors.reset}`, '->->->->->->->->->-> handling request <-<-<-<-<-<-<-<-<-<-');
     try {
@@ -77,14 +80,20 @@ app.use((error, req, res, next) => {
         message: 'Có lỗi xảy ra!',
     });
 });
+// #endregion Routes
 // start
 function mainFlow() {
     return __awaiter(this, void 0, void 0, function* () {
-        yield db_1.default.connect();
-        console.log(server_1.default.port);
-        server.listen(server_1.default.port, () => {
-            console.log('Listening on port ' + server_1.default.port + '\nWelcome to game!');
-        });
+        console.log('[CONF] Config port: ', server_1.default.port, '');
+        try {
+            yield db_1.default.connect();
+            server.listen(server_1.default.port, () => {
+                console.log('[SYS] Listening on port ' + server_1.default.port + '\n[SYS] Welcome to game!\n');
+            });
+        }
+        catch (error) {
+            console.log('An error correct: ', error);
+        }
     });
 }
 mainFlow();

@@ -1448,7 +1448,9 @@ import Turn from '../../shares/turn'
 //         _id: '6528fb7d960eecd821e4040a',
 //     },
 // ]
+// #endregion config card and stair
 
+// #region config start turn dev
 // const t = setTimeout(() => console.log('Start new turn'), 1)
 // const turnConfig = new Turn(0, t, '115421543287322673156111')
 // {
@@ -1460,7 +1462,7 @@ import Turn from '../../shares/turn'
 //     cards: [],
 // }
 // const logsPub = [turnConfig]
-// #endregion config card and stair
+// #endregion config start turn dev
 
 export default function (io: any) {
     io.on('connection', async function (socket: any) {
