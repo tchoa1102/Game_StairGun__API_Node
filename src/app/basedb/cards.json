@@ -1,0 +1,27 @@
+[{
+  "_id": {
+    "$oid": "652fa293db5f87468210b950"
+  },
+  "name": "Double damage",
+  "type": "x2",
+  "src": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-double-damage.png",
+  "match": "CardDoubleDamage"
+},
+{
+  "_id": {
+    "$oid": "652fa2d4db5f87468210b951"
+  },
+  "name": "Neutralization",
+  "type": "neutralization",
+  "src": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-disable.png",
+  "match": "CardNeutralization"
+},
+{
+  "_id": {
+    "$oid": "653a0e978921bd559f219766"
+  },
+  "name": "Avoid Attack",
+  "type": "x2",
+  "src": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/cards/Card-on-avoid-attack.png",
+  "match": "avoidAttack"
+}]

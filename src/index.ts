@@ -1,5 +1,3 @@
-import fs from 'fs'
-import path from 'path'
 import express from 'express'
 import morgan from 'morgan'
 import { Server } from 'socket.io'
@@ -79,7 +77,6 @@ app.use((error: any, req: any, res: any, next: any) => {
 
 // start
 async function mainFlow(): Promise<void> {
-    console.log('[CONF] Config port: ', config.port, '')
     try {
         await db.connect()
         server.listen(config.port, () => {

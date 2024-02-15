@@ -1,0 +1,88 @@
+[{
+  "_id": {
+    "$oid": "65448c77e0efce992f62fbaf"
+  },
+  "name": "Mũ Doremon",
+  "type": "face",
+  "canWear": true,
+  "imgItem": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/equipment/face/face.doremon.item.png",
+  "texture": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1699550530/StairGunGame/equipment/face/face.doremon.png",
+  "hasPowerSkill": {
+    "$oid": "000000000000000000000000"
+  },
+  "description": "",
+  "properties": [
+    {
+      "value": 10,
+      "type": "HP"
+    }
+  ],
+  "price": 100,
+  "isSale": true
+},
+{
+  "_id": {
+    "$oid": "65448d6ae0efce992f62fbb0"
+  },
+  "name": "Áo Doremon",
+  "type": "body",
+  "canWear": true,
+  "imgItem": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/equipment/body/body.doremon.item.png",
+  "texture": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1699597726/StairGunGame/equipment/body/body.doremon.png",
+  "hasPowerSkill": {
+    "$oid": "000000000000000000000000"
+  },
+  "description": "",
+  "properties": [
+    {
+      "value": 15,
+      "type": "DEF"
+    }
+  ],
+  "price": 100,
+  "isSale": true
+},
+{
+  "_id": {
+    "$oid": "65448db9e0efce992f62fbb1"
+  },
+  "name": "Quần Doremon",
+  "type": "foot",
+  "canWear": true,
+  "imgItem": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/equipment/foot/foot.doremon.item.png",
+  "texture": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1699597820/StairGunGame/equipment/foot/foot.doremon.png",
+  "hasPowerSkill": {
+    "$oid": "000000000000000000000000"
+  },
+  "description": "",
+  "properties": [
+    {
+      "value": 10,
+      "type": "DEF"
+    }
+  ],
+  "price": 100,
+  "isSale": true
+},
+{
+  "_id": {
+    "$oid": "654ed6dda2ca30dc78b8051f"
+  },
+  "name": "Kiếm Tinh Linh",
+  "type": "weapon",
+  "canWear": true,
+  "imgItem": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1699664476/StairGunGame/equipment/weapon/The-Spirit-Sword.item.png",
+  "texture": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1699862545/StairGunGame/equipment/weapon/The-Spirit-Sword.png",
+  "hasPowerSkill": {
+    "$oid": "000000000000000000000000"
+  },
+  "description": "Thanh kiếm được rèn đúc bởi thần linh. Bên trong nó chứa đựng sức mạnh kinh khủng.",
+  "properties": [
+    {
+      "value": 100,
+      "type": "ATK"
+    }
+  ],
+  "price": 500,
+  "isSale": true
+}]

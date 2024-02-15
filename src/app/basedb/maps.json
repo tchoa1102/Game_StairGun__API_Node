@@ -1,0 +1,47 @@
+[{
+  "_id": {
+    "$oid": "650151b1187107a35aa5c220"
+  },
+  "name": "gift-box",
+  "type": "",
+  "objects": [
+    {
+      "location": {
+        "x": 100,
+        "y": -400
+      },
+      "data": {
+        "$oid": "653938778921bd559f21975f"
+      }
+    },
+    {
+      "location": {
+        "x": 600,
+        "y": -340
+      },
+      "data": {
+        "$oid": "65393b588921bd559f219760"
+      }
+    },
+    {
+      "location": {
+        "x": 70,
+        "y": -400
+      },
+      "data": {
+        "$oid": "65386e998921bd559f21975e"
+      }
+    }
+  ],
+  "backgroundGunGame": "https://res.cloudinary.com/dyhfvkzag/image/upload/v1/StairGunGame/gunGame/map/gift-box/fowwffflnuaczhzwkvve.png",
+  "playersLocations": [
+    {
+      "x": 600,
+      "y": -340
+    },
+    {
+      "x": 190.5,
+      "y": -400
+    }
+  ]
+}]

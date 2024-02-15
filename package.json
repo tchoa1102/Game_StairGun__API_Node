@@ -5,8 +5,11 @@
     "main": "src/index.ts",
     "scripts": {
         "start": "nodemon src/index.ts",
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "tsc"
+        "start:prod": "node dist/src/index.js",
+        "build": "tsc",
+        "docker-build": "docker compose up --build --no-recreate -d",
+        "docker-build:up": "docker compose up -d",
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
         "type": "git",
@@ -26,7 +29,6 @@
     "homepage": "https://github.com/TKOGNISHU/StairGunGame__API_Node#readme",
     "devDependencies": {
         "@types/morgan": "^1.9.9",
-        "morgan": "^1.10.0",
         "nodemon": "^3.0.1",
         "ts-node": "^10.9.2",
         "typescript": "^5.3.3"
@@ -39,6 +41,7 @@
         "firebase-admin": "^11.10.1",
         "mathjs": "^11.11.2",
         "mongoose": "^7.5.0",
+        "morgan": "^1.10.0",
         "nerdamer": "^1.1.13",
         "socket.io": "^4.7.2"
     }

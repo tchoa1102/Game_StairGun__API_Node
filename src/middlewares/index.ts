@@ -1,5 +1,5 @@
-const { UserModel } = require('../app/models')
-const adminConfig = require('../firebase')
+import { UserModel } from '../app/models'
+import adminConfig from '../firebase'
 
 class Middleware {
     async decodeToken(
@@ -81,6 +81,9 @@ class Middleware {
                 }
                 socket.handshake.idPlayer = id
                 const user = await UserModel.findById(id).lean()
+                if (!user) {
+                    return next(new Error("Couldn't find user!"))
+                }
                 socket.handshake.namePlayer = user.name
                 next()
             }

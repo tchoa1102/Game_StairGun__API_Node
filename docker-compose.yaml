@@ -1,8 +1,13 @@
+# "name" is short hand of "COMPOSE_PROJECT_NAME" when defined. But you must use correct name, is "COMPOSE_PROJECT_NAME"
 name: game_stairgun
 services:
+  # client:
+  #   extends:
+  #     file: ../../Phaser/Game_StairGun__Client_Phaser/docker-compose.yaml
+  #     service: client
   server:
-    image: kyuseishu/game_stairgun
-    container_name: ${name}server
+    image: kyuseishu/${COMPOSE_PROJECT_NAME}/server
+    container_name: server
     ports:
       - 4000:4000
     build:
@@ -10,23 +15,25 @@ services:
     env_file:
       - .env
     environment:
-      - IS_PRODUCTION=_DB
-      - MONGO_URL_DB=mongodb://mongodb:27017/stair_gun_game_dev
+      - MONGO_URL=mongodb://mongodb:27017/stair_gun_game
+      - ALLOWED_ORIGINS="['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500', 'http://127.0.0.1:5500', 'https://localhost:5500']"
     networks:
-      - game_stairgun
+      game_stairgun:
   mongodb:
     image: mongo:6
-    container_name: ${name}mongodb
+    container_name: mongodb
     ports:
       - 27017:27017
     volumes:
       - stairgun_game:/data/db
     networks:
-      - game_stairgun
+      game_stairgun:
 
 volumes:
   stairgun_game:
+    name: ${COMPOSE_PROJECT_NAME}
 
 networks:
   game_stairgun:
+    name: ${COMPOSE_PROJECT_NAME}
     driver: bridge
