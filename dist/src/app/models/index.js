@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FriendModel = exports.MessageModel = exports.CardOnMatchModel = exports.PlayerOnMatchModel = exports.RoomModel = exports.StateEffectModel = exports.SkillModel = exports.PowerSkillsModel = exports.MapModel = exports.ItemModel = exports.CharacterModel = exports.CardModel = exports.MatchModel = exports.UserModel = void 0;
+exports.ObjectModel = exports.FriendModel = exports.MessageModel = exports.CardOnMatchModel = exports.PlayerOnMatchModel = exports.RoomModel = exports.StateEffectModel = exports.SkillModel = exports.PowerSkillsModel = exports.MapModel = exports.ItemModel = exports.CharacterModel = exports.CardModel = exports.MatchModel = exports.UserModel = void 0;
 var user_model_1 = require("./user.model");
 Object.defineProperty(exports, "UserModel", { enumerable: true, get: function () { return __importDefault(user_model_1).default; } });
 var match_models_1 = require("./match.models");
@@ -32,3 +32,5 @@ var message_model_1 = require("./message.model");
 Object.defineProperty(exports, "MessageModel", { enumerable: true, get: function () { return __importDefault(message_model_1).default; } });
 var friend_model_1 = require("./friend.model");
 Object.defineProperty(exports, "FriendModel", { enumerable: true, get: function () { return __importDefault(friend_model_1).default; } });
+var object_model_1 = require("./object.model");
+Object.defineProperty(exports, "ObjectModel", { enumerable: true, get: function () { return __importDefault(object_model_1).default; } });

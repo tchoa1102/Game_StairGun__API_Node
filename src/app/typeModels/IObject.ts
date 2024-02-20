@@ -1,7 +1,7 @@
-import { Schema, model } from 'mongoose'
-import { IObject } from '../typeModels'
+import mongoose from 'mongoose'
+import { ILocation } from '../../shares/interfaces'
 
-const ObjectSchema = new Schema<IObject>(
+const ObjectModel = new mongoose.Schema(
     {
         name: { type: String, required: true },
         points: [{ x: Number, y: Number }],
@@ -13,4 +13,9 @@ const ObjectSchema = new Schema<IObject>(
     },
 )
 
-export default model('objects', ObjectSchema)
+export default interface IObject {
+    name: string
+    points: Array<ILocation>
+    src: string
+    canBeDestroyed: boolean
+}

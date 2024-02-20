@@ -1,11 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importDefault(require("mongoose"));
-const ObjectModel = require('./object.model');
-const MapModel = new mongoose_1.default.Schema({
+const mongoose_1 = require("mongoose");
+const MapModel = new mongoose_1.Schema({
     name: { type: String, required: true },
     type: { type: String, default: '' },
     objects: [
@@ -14,7 +10,7 @@ const MapModel = new mongoose_1.default.Schema({
                 x: { type: Number, required: true },
                 y: { type: Number, required: true },
             },
-            data: { type: mongoose_1.default.Types.ObjectId, ref: 'objects', required: true },
+            data: { type: mongoose_1.Types.ObjectId, ref: 'objects', required: true },
         },
     ],
     playersLocations: [
@@ -28,4 +24,4 @@ const MapModel = new mongoose_1.default.Schema({
         default: 'C:UsersadminOneDriveWorkspacePhaserGame_StairGun__Client_Phasersrcservicessocket',
     },
 });
-exports.default = mongoose_1.default.model('maps', MapModel);
+exports.default = (0, mongoose_1.model)('maps', MapModel);

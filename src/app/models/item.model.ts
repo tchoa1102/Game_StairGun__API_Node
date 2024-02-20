@@ -1,10 +1,11 @@
-import mongoose from 'mongoose'
-const ObjectId = mongoose.Schema.ObjectId
-const newObjectId = mongoose.Types.ObjectId
+import { Schema, model, Types } from 'mongoose'
+import { propertySchema } from '../schemas'
+import { IItem } from '../typeModels'
 
-const { propertySchema } = require('../schemas')
+const ObjectId = Schema.ObjectId
+const newObjectId = Types.ObjectId
 
-const ItemModel = new mongoose.Schema({
+const ItemSchema = new Schema<IItem>({
     name: { type: String, required: true },
     type: { type: String, required: true }, // face, body, foot, weapon
     canWear: { type: Boolean, default: false },
@@ -21,7 +22,7 @@ const ItemModel = new mongoose.Schema({
     isSale: { type: Boolean, default: true },
 })
 
-export default mongoose.model('items', ItemModel)
+export default model('items', ItemSchema)
 
 /**
  * config animation use public

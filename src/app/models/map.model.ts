@@ -1,7 +1,8 @@
-import mongoose from 'mongoose'
-const ObjectModel = require('./object.model')
+import { Schema, Types, model } from 'mongoose'
+import { IMap } from '../typeModels'
+import ObjectModel from './object.model'
 
-const MapModel = new mongoose.Schema({
+const MapModel = new Schema<IMap>({
     name: { type: String, required: true },
     type: { type: String, default: '' },
     objects: [
@@ -10,7 +11,7 @@ const MapModel = new mongoose.Schema({
                 x: { type: Number, required: true },
                 y: { type: Number, required: true },
             },
-            data: { type: mongoose.Types.ObjectId, ref: 'objects', required: true },
+            data: { type: Types.ObjectId, ref: 'objects', required: true },
         },
     ],
     playersLocations: [
@@ -25,4 +26,4 @@ const MapModel = new mongoose.Schema({
     },
 })
 
-export default mongoose.model('maps', MapModel)
+export default model('maps', MapModel)

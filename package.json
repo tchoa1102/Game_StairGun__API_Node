@@ -5,10 +5,15 @@
     "main": "src/index.ts",
     "scripts": {
         "start": "nodemon src/index.ts",
-        "start:prod": "node dist/src/index.js",
+        "start:prod": "npm --version && npm run migrate:up:prod && node src/index.js",
         "build": "tsc",
         "docker-build": "docker compose up --build --no-recreate -d",
         "docker-build:up": "docker compose up -d",
+        "migrate:one": "npx migrate up first-migrate",
+        "migrate:up": "npx migrate up --migrations-path migrations",
+        "migrate:up:prod": "npx migrate up -m migrations -a -enter",
+        "migrate:down": "npx migrate down",
+        "migrate:down:prod": "npx migrate down",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
@@ -43,6 +48,7 @@
         "mongoose": "^7.5.0",
         "morgan": "^1.10.0",
         "nerdamer": "^1.1.13",
-        "socket.io": "^4.7.2"
+        "socket.io": "^4.7.2",
+        "ts-migrate-mongoose": "^3.6.0"
     }
 }

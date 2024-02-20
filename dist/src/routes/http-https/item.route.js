@@ -5,8 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
-const { ItemController } = require('../../app/controllers');
-router.get('/', ItemController.getAll);
-router.post('/buy', ItemController.buy);
-router.post('/sell', ItemController.sellItem);
+const controllers_1 = require("../../app/controllers");
+router.get('/', controllers_1.ItemController.getAll);
+router.post('/buy', controllers_1.ItemController.buy);
+router.post('/sell', controllers_1.ItemController.sellItem);
 exports.default = router;

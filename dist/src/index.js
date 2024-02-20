@@ -32,6 +32,7 @@ const db_1 = __importDefault(require("./config/db"));
 const http_1 = require("http");
 const gameConfig_json_1 = __importDefault(require("./gameConfig.json"));
 const middlewares_1 = __importDefault(require("./middlewares"));
+const controllers_1 = require("./app/controllers");
 // #region Server configuration
 const optionCORS = {
     origin(requestOrigin, callback) {
@@ -71,6 +72,7 @@ app.use((req, res, next) => {
     //     '-x-x-x-x-x- request was handled -x-x-x-x-x-',
     // )
 });
+app.get('/test/db', controllers_1.ItemController.getAll);
 (0, http_https_1.default)(app);
 io.use(middlewares_1.default.decodeTokenSocket);
 (0, socket_io_2.default)(io);
@@ -84,7 +86,6 @@ app.use((error, req, res, next) => {
 // start
 function mainFlow() {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('[CONF] Config port: ', server_1.default.port, '');
         try {
             yield db_1.default.connect();
             server.listen(server_1.default.port, () => {

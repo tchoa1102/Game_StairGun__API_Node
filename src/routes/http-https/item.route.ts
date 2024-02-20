@@ -1,6 +1,6 @@
 import express from 'express'
 const router = express.Router()
-const { ItemController } = require('../../app/controllers')
+import { ItemController } from '../../app/controllers'
 
 router.get('/', ItemController.getAll)
 router.post('/buy', ItemController.buy)

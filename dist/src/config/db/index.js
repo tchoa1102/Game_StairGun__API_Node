@@ -15,10 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const URL = 'MONGO_URL' + (process.env.IS_PRODUCTION || '');
-        console.log('[...] Connect string mongo: ' + URL);
+        console.log('Connecting to mongodb string: ', process.env.MONGO_URL);
         return mongoose_1.default
-            .connect(process.env[URL])
+            .connect(process.env.MONGO_URL)
             .then(() => console.log('[COMPLETED] Successfully connect!'))
             .catch((e) => {
             console.log(e);

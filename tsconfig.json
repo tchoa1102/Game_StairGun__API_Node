@@ -111,6 +111,6 @@
   "buildOptions": {
     "force": true
   },
-  "include": ["./package.json", "./package-lock.json", "src/**/*.ts", "src/**/*.json"],
+  "include": ["./package.json", "./package-lock.json", "src/**/*.ts", "migrations/**.ts", "src/**/*.json"],
   "exclude": ["node_modules"]
 }

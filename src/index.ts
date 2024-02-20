@@ -21,6 +21,7 @@ import db from './config/db'
 import { createServer } from 'http'
 import configGame from './gameConfig.json'
 import middlewares from './middlewares'
+import { ItemController } from './app/controllers'
 
 // #region Server configuration
 const optionCORS: cors.CorsOptions = {
@@ -64,6 +65,7 @@ app.use((req: any, res: any, next: any) => {
     //     '-x-x-x-x-x- request was handled -x-x-x-x-x-',
     // )
 })
+app.get('/test/db', ItemController.getAll)
 router(app)
 io.use(middlewares.decodeTokenSocket)
 routerSocketIO(io)

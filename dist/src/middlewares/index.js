@@ -8,9 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const { UserModel } = require('../app/models');
-const adminConfig = require('../firebase');
+const models_1 = require("../app/models");
+const firebase_1 = __importDefault(require("../firebase"));
 class Middleware {
     decodeToken(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -18,7 +21,7 @@ class Middleware {
             try {
                 const dataAuthorization = req.headers.authorization.split(' ');
                 const token = dataAuthorization[1];
-                const decodeValue = yield adminConfig.auth().verifyIdToken(token);
+                const decodeValue = yield firebase_1.default.auth().verifyIdToken(token);
                 if (decodeValue) {
                     // console.log(decodeValue)
                     const id = decodeValue.firebase.identities['google.com'];
@@ -41,9 +44,9 @@ class Middleware {
             const dataUser = req.user;
             let id = dataUser.firebase.identities['google.com'][0];
             try {
-                let user = yield UserModel.findById(id).exec();
+                let user = yield models_1.UserModel.findById(id).exec();
                 if (!user) {
-                    user = new UserModel(Object.assign(Object.assign({}, dataUser), { _id: id }));
+                    user = new models_1.UserModel(Object.assign(Object.assign({}, dataUser), { _id: id }));
                     yield user.save();
                 }
                 req.user = Object.assign(Object.assign({}, dataUser), user);
@@ -61,7 +64,7 @@ class Middleware {
             const accessToken = req.auth.token || req.auth.access_token || req.auth.accessToken;
             // console.log(accessToken)
             try {
-                const decodeValue = yield adminConfig.auth().verifyIdToken(accessToken);
+                const decodeValue = yield firebase_1.default.auth().verifyIdToken(accessToken);
                 if (decodeValue) {
                     // console.log(decodeValue)
                     let id = decodeValue.firebase.identities['google.com'][0];
@@ -69,7 +72,10 @@ class Middleware {
                         id = id + '1';
                     }
                     socket.handshake.idPlayer = id;
-                    const user = yield UserModel.findById(id).lean();
+                    const user = yield models_1.UserModel.findById(id).lean();
+                    if (!user) {
+                        return next(new Error("Couldn't find user!"));
+                    }
                     socket.handshake.namePlayer = user.name;
                     next();
                 }
