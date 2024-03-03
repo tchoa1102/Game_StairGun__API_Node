@@ -1472,6 +1472,7 @@ export default function (io: any) {
         // console.log(socket)
 
         // #region test env => can xoa
+        console.log('Features...')
         socket.handshake.idRoom = '1'
         socket.join(socket.handshake.idRoom)
         socket.handshake.match = {
