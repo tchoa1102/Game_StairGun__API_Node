@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { IPlayer } from '../typeModels'
 const Schema = mongoose.Schema
 const ObjectId = Schema.ObjectId
 const newObjectId = mongoose.Types.ObjectId
@@ -6,7 +7,7 @@ const newObjectId = mongoose.Types.ObjectId
 const CharacterModel = require('./character.model')
 const { itemSchema } = require('../schemas')
 
-const UserModel = new Schema(
+const UserModel = new Schema<IPlayer>(
     {
         uid: { type: String, default: null }, //idFBase
         socketId: { type: String, default: null },

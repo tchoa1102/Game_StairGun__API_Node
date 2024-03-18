@@ -32,20 +32,22 @@ export default class Parabola {
         return this.a * x ** 2 + this.b * x + this.c
     }
 
-    intersectionWithStraightLine(line: Line) {
+    intersectionWithStraightLine(line: Line): Array<Collision> {
         const l = line.createVariable()
         const equationL2 = new Parabola().copy(this).sumLine(l)
         const xIntersection = MathHelper.solveEquationLevel2(equationL2)
         if (!xIntersection) return []
-        const intersection = xIntersection.reduce((result: Array<Collision>, x: number) => {
-            const pointInter = new Point(x)
-            if (line.isPointInside(pointInter)) {
+        const intersection: Array<Collision> = xIntersection.reduce(
+            (result: Array<Collision>, x: number) => {
+                const pointInter = new Point(x)
                 const newIntersection = new Collision(pointInter, line)
-
-                result.push(newIntersection)
-            }
-            return result
-        }, [])
+                if (newIntersection.isValidX()) {
+                    result.push(newIntersection)
+                }
+                return result
+            },
+            [],
+        )
 
         return intersection
     }

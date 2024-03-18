@@ -1,4 +1,5 @@
 import configGame from '../../gameConfig.json'
+import Collision from './collision'
 import Line from './line'
 import MathHelper from './math.helper'
 import Parabola from './parabola'
@@ -9,7 +10,7 @@ class Bullet {
     public a: number
     public b: number
     public c: number
-    public parabola: any
+    public parabola?: Parabola
     constructor(x0: number, y0: number, angle: number, velocity_0: number, windForce: number) {
         /** y↑angle ↗
          *   |৲   ∕
@@ -27,18 +28,18 @@ class Bullet {
     }
 
     findCollision(shape_players: Array<any>, polygons: Array<any>, findRegularCallback: any) {
-        const playerCollisions = shape_players.reduce((total, p) => {
+        const playerCollisions: Array<Collision> = shape_players.reduce((total, p) => {
             const numLine = p.length
             for (let i = 0; i < numLine; ++i) {
                 const lastIndex = (i + 1) % numLine
                 const tarLine = new Line().init(p[i], p[lastIndex])
-                const intersection = this.parabola.intersectionWithStraightLine(tarLine)
+                const intersection = this.parabola!.intersectionWithStraightLine(tarLine)
                 if (!intersection) continue
                 total.push(...intersection)
             }
             return total
         }, [])
-        const polygonCollisions = polygons.reduce((total, poly) => {
+        const polygonCollisions: Array<Collision> = polygons.reduce((total, poly) => {
             const polyPoint = poly.data.points
             const numLine = polyPoint.length
             for (let i = 0; i < numLine; ++i) {
@@ -46,25 +47,26 @@ class Bullet {
                 const f_edge = getLocationOnOxy(poly.location, polyPoint[i])
                 const l_edge = getLocationOnOxy(poly.location, polyPoint[lastIndex])
                 const tarLine = new Line().init(f_edge, l_edge)
-                const intersection = this.parabola.intersectionWithStraightLine(tarLine)
+                const intersection = this.parabola!.intersectionWithStraightLine(tarLine)
                 total.push(...intersection)
             }
             return total
         }, [])
-        // console.log(playerCollisions, polygonCollisions)
-        const collision = [...playerCollisions, ...polygonCollisions].reduce(
-            (result, collision) => {
-                if (findRegularCallback(this.location.x, collision.location.x)) {
-                    if (!result) {
-                        result = collision
-                    }
-                    if (!findRegularCallback(result.location.x, collision.location.x))
-                        result = collision
+        console.log(playerCollisions, polygonCollisions)
+        const collisions = [...playerCollisions, ...polygonCollisions]
+        if (collisions.length === 0) return null
+        const collision = collisions.reduce((result: Collision, collision: Collision) => {
+            if (!collision.location) return result
+            if (findRegularCallback(this.location.x, collision.location.x)) {
+                if (!result) {
+                    result = collision
                 }
-                return result
-            },
-            null,
-        )
+                if (!result.location) return result
+                if (!findRegularCallback(result.location.x, collision.location.x))
+                    result = collision
+            }
+            return result
+        })
 
         return collision
     }

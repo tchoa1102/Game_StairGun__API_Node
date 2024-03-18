@@ -10,6 +10,9 @@ import Circle from '../../shares/maths/circle'
 import GunState from './models/gun'
 import { startNewTurn } from '../../shares'
 import CardDoubleDamage from '../../shares/cards/CardDoubleDamage'
+import IResPLayerAfterBattle, {
+    ResPLayerAfterBattle,
+} from './interfaces/IResPlayerStatusAfterBattle'
 
 export default class GunGame {
     public baseUrl: any
@@ -262,7 +265,14 @@ export default class GunGame {
             const angleSign = angle > 0
             angle = 90 - angle
             const windForce = curTurn.windForce
-            console.log('Start battle phase, wind force: ', windForce)
+            console.log(
+                'Start battle phase, wind force: ',
+                windForce,
+                '; angle sign: ',
+                angleSign,
+                '; angle: ',
+                angle,
+            )
             const playersInfo = this.socket.handshake.match.players
             const player = this.socket.handshake.match.player
             const centerPlayer = new Point(
@@ -298,50 +308,48 @@ export default class GunGame {
             const bullet = new Bullet(centerPlayer.x, centerPlayer.y, angle, velocity_0, windForce)
             const funcCompare = angleSign ? moreX : lessX
             const collision = bullet.findCollision(playerShapes, polygonShape, funcCompare)
-            console.log(collision)
+            console.log('collision:', collision)
 
-            const res = new GunState([], [])
             // #endregion handle collision
+            const res = new GunState()
             // #region calculate when collision
             if (collision) {
-                collision.location.y = bullet.parabola.computeY(collision.location.x)
-                const circleEffect = new Circle(collision.location, 10)
+                collision.location!.y = bullet.parabola!.computeY(collision.location!.x)
+                const circleEffect = new Circle(collision.location!, 10)
                 // playerInfo = { target: {_id}, mainGame: { ..., shape } }
-                const playerCollision = playersData.reduce((result: any, playerInfo: any) => {
-                    // console.log(playerInfo)
-                    const shape = playerInfo.mainGame.shape
-                    const checkResult = circleEffect.isPolygonCollision(shape)
-                    if (checkResult.isCollection) {
-                        // { target: {_id}, damages: Array<number>, HP: number }
-                        const r: any = {
-                            target: {
-                                _id: player.target._id,
-                            },
-                            damages: [],
-                            HP: player.mainGame.HP,
+                const playerCollision = playersData.reduce(
+                    (result: Array<IResPLayerAfterBattle>, playerInfo: any) => {
+                        // console.log(playerInfo)
+                        const shape = playerInfo.mainGame.shape
+                        const checkResult = circleEffect.isPolygonCollision(shape)
+                        if (checkResult.isCollection) {
+                            console.log('Collision')
+                            const r: IResPLayerAfterBattle = new ResPLayerAfterBattle(
+                                player.target._id,
+                                player.mainGame.HP,
+                            )
+                            // ----------------------------------------------------------------
+                            let damage = player.mainGame.ATK - (3 * playerInfo.mainGame.DEF) / 4
+                            // calculate damage
+                            const data = { damage }
+
+                            curTurn.cards.forEach((card: any) => card.effect(data))
+
+                            r.damages.push(data.damage)
+                            r.HP -= data.damage
+                            result.push(r)
                         }
-                        console.log('Colision')
-                        // result.push()
-                        // ----------------------------------------------------------------
-                        let damage = player.mainGame.ATK - (3 * playerInfo.mainGame.DEF) / 4
-                        // calculate damage
-                        const data = { damage }
 
-                        curTurn.cards.forEach((card: any) => card.effect(data))
-
-                        r.damages.push(data.damage)
-                        r.HP -= data.damage
-                        result.push(r)
-                    }
-
-                    return result
-                }, [])
+                        return result
+                    },
+                    [],
+                )
                 res.players = playerCollision
             }
             // #endregion calculate when collision
 
             // #region calculate list bullet's location
-            const bullet0 = new BulletState(new Point(centerPlayer.x, centerPlayer.y), angle)
+            const bullet0 = new BulletState(new Point().copy(centerPlayer), angle)
             const locationsBullet = [bullet0]
 
             const callbackChangeLocationX = angleSign ? increaseX : decreaseX
@@ -350,17 +358,17 @@ export default class GunGame {
                 const x = callbackChangeLocationX(
                     locationsBullet[locationsBullet.length - 1].point.x,
                 )
-                const bulletPoint = new Point(x, -bullet.parabola.computeY(x))
+                const bulletPoint = new Point(x, -bullet.parabola!.computeY(x))
                 const preBullet = locationsBullet[locationsBullet.length - 1].point
                 const lineXAndPreX = new Line().init(preBullet, bulletPoint)
                 const locationBullet = new BulletState(bulletPoint, lineXAndPreX.calcAngle())
-                if (collision && locationBullet.point.x >= collision.location.x) break
+                if (collision && locationBullet.point.x >= collision.location!.x) break
                 locationsBullet.push(locationBullet)
             }
             res.bullets = locationsBullet
             // #endregion calculate list bullet's location
 
-            // console.log(res)
+            console.log('Result gun: ', res)
             // #endregion handle gun
 
             // start battle phase 15s

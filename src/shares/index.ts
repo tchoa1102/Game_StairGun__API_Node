@@ -146,38 +146,26 @@ export function startNewTurn(_this: any, match: any) {
     curTurn.phase = phases.endPhase.key
 
     // #region gift
-    const { teamA, teamB } = Array.from(match.players).reduce(
-        (acc: ITeam, player: any) => {
-            const p = _this.io.sockets.sockets.get(player.socketId)
-            // console.log(player.socketId)
-            if (p) {
-                // bug: player go out isn't computed
-                if (p.handshake.match.player.position < 3) {
-                    if (p.handshake.match.player.mainGame.HP > 0) {
-                        acc.teamA.canPlay.push(player)
-                    }
-                    acc.teamA.onRoom.push(player)
+    const { teamA, teamB } = Array.from(match.players).reduce((acc: ITeam, player: any) => {
+        const p = _this.io.sockets.sockets.get(player.socketId)
+        // console.log(player.socketId)
+        if (p) {
+            // bug: player go out isn't computed
+            if (p.handshake.match.player.position < 3) {
+                if (p.handshake.match.player.mainGame.HP > 0) {
+                    acc.teamA.canPlay.push(player)
                 }
-                if (p.handshake.match.player.position >= 3) {
-                    if (p.handshake.match.player.mainGame.HP > 0) {
-                        acc.teamB.canPlay.push(player)
-                    }
-                    acc.teamB.onRoom.push(player)
-                }
+                acc.teamA.onRoom.push(player)
             }
-            return acc
-        },
-        {
-            teamA: {
-                onRoom: [],
-                canPlay: [],
-            },
-            teamB: {
-                onRoom: [],
-                canPlay: [],
-            },
-        },
-    )
+            if (p.handshake.match.player.position >= 3) {
+                if (p.handshake.match.player.mainGame.HP > 0) {
+                    acc.teamB.canPlay.push(player)
+                }
+                acc.teamB.onRoom.push(player)
+            }
+        }
+        return acc
+    }, new TeamData())
     // console.log(teamA, teamB)
     const statuses: any = {
         AGI: 0,
@@ -357,13 +345,21 @@ export function startNewTurn(_this: any, match: any) {
 //     startNewTurn,
 // }
 
+class Team {
+    public onRoom: Array<any> = []
+    public canPlay: Array<any> = []
+}
+
 interface ITeam {
-    teamA: {
-        onRoom: Array<any>
-        canPlay: Array<any>
-    }
-    teamB: {
-        onRoom: Array<any>
-        canPlay: Array<any>
+    teamA: Team
+    teamB: Team
+}
+
+class TeamData implements ITeam {
+    teamA: Team
+    teamB: Team
+    constructor() {
+        this.teamA = new Team()
+        this.teamB = new Team()
     }
 }
