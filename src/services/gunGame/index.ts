@@ -349,26 +349,24 @@ export default class GunGame {
             // #endregion calculate when collision
 
             // #region calculate list bullet's location
-            const bullet0 = new BulletState(new Point().copy(centerPlayer), angle)
-            const locationsBullet = [bullet0]
+            const firstBulletLocation = new BulletState(new Point().copy(centerPlayer), angle)
+            const locationsBullet = [firstBulletLocation]
 
             const callbackChangeLocationX = angleSign ? increaseX : decreaseX
-            // console.log('bullet: ', bullet0.point.x, angleSign)
             for (let i = 0.005; i <= configGame.gunGame.battlePhase.value; i += 0.005) {
-                const x = callbackChangeLocationX(
-                    locationsBullet[locationsBullet.length - 1].point.x,
-                )
-                const bulletPoint = new Point(x, -bullet.parabola!.computeY(x))
                 const preBullet = locationsBullet[locationsBullet.length - 1].point
-                const lineXAndPreX = new Line().init(preBullet, bulletPoint)
-                const locationBullet = new BulletState(bulletPoint, lineXAndPreX.calcAngle())
+                const x = callbackChangeLocationX(preBullet.x)
+                const bulletPoint = new Point(x, bullet.parabola!.computeY(x))
+                const PreXToNowPoint = new Line(preBullet, bulletPoint)
+                const locationBullet = new BulletState(bulletPoint, PreXToNowPoint.calcAngle())
                 if (collision && locationBullet.point.x >= collision.location!.x) break
                 locationsBullet.push(locationBullet)
             }
-            res.bullets = locationsBullet
+            // console.log('Location bullet: ', locationsBullet)
             // #endregion calculate list bullet's location
+            res.bullets = locationsBullet
 
-            console.log('Result gun: ', res)
+            // console.log('Result gun: ', res)
             // #endregion handle gun
 
             // start battle phase 15s

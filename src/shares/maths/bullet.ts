@@ -52,10 +52,11 @@ class Bullet {
             }
             return total
         }, [])
-        console.log(playerCollisions, polygonCollisions)
+        console.log(this.location.x, playerCollisions, polygonCollisions)
         const collisions = [...playerCollisions, ...polygonCollisions]
         if (collisions.length === 0) return null
-        const collision = collisions.reduce((result: Collision, collision: Collision) => {
+        const collision = collisions.reduce((result: Collision | null, collision: Collision) => {
+            // collision is exist?
             if (!collision.location) return result
             if (findRegularCallback(this.location.x, collision.location.x)) {
                 if (!result) {
@@ -66,7 +67,7 @@ class Bullet {
                     result = collision
             }
             return result
-        })
+        }, null)
 
         return collision
     }

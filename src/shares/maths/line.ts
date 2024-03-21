@@ -3,11 +3,11 @@ import MathHelper from './math.helper'
 import Vector from './vector'
 
 export default class Line {
-    public first: Point
-    public last: Point
-    constructor() {
-        this.first = new Point()
-        this.last = new Point()
+    public first: Point = new Point()
+    public last: Point = new Point()
+    constructor(first?: Point, last?: Point) {
+        if (first) this.first = first
+        if (last) this.last = last
     }
 
     init(first: Point, last: Point) {
